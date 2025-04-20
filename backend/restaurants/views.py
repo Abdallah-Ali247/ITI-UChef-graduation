@@ -95,3 +95,14 @@ class RestaurantViewSet(viewsets.ModelViewSet):
                 {'detail': 'You do not have a restaurant set up yet.'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class IngredientViewSet(viewsets.ModelViewSet):
+    serializer_class = IngredientSerializer
+    permission_classes = [IsAuthenticated, IsRestaurantOwnerOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'description']
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve'] or self.request.method == 'GET':
+            return [AllowAny()]
+        return super().get_permissions()
