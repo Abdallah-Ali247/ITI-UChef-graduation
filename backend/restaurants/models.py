@@ -11,6 +11,8 @@ class Restaurant(models.Model):
     opening_time = models.TimeField()
     closing_time = models.TimeField()
     is_active = models.BooleanField(default=True)
+    is_approved = models.BooleanField(null=True, default=None)  # None = pending, True = approved, False = rejected
+    rejection_reason = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

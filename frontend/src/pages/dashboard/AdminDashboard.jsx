@@ -458,8 +458,9 @@ const AdminDashboard = () => {
                                 <Link to={`/admin/edit-restaurant/${restaurant.id}`} style={{...styles.btnOutline, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}>
                                   Edit
                                 </Link>
-                                {restaurant.is_approved === null && (
-                                  <div className="restaurant-card-actions">
+                                <div className="restaurant-card-actions">
+                                  {/* Show Approve button if not already approved */}
+                                  {restaurant.is_approved !== true && (
                                     <button 
                                       style={{...styles.btnSuccess, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}
                                       onClick={() => {
@@ -468,8 +469,12 @@ const AdminDashboard = () => {
                                         setShowApprovalModal(true);
                                       }}
                                     >
-                                      Approve
+                                      {restaurant.is_approved === null ? 'Approve' : 'Change to Approved'}
                                     </button>
+                                  )}
+                                  
+                                  {/* Show Reject button if not already rejected */}
+                                  {restaurant.is_approved !== false && (
                                     <button 
                                       style={{...styles.btnDanger, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}
                                       onClick={() => {
@@ -478,16 +483,61 @@ const AdminDashboard = () => {
                                         setShowApprovalModal(true);
                                       }}
                                     >
-                                      Reject
+                                      {restaurant.is_approved === null ? 'Reject' : 'Change to Rejected'}
                                     </button>
-                                  </div>
-                                )}
-                                {restaurant.is_approved === true && (
-                                  <span className="badge bg-success">Approved</span>
-                                )}
-                                {restaurant.is_approved === false && (
-                                  <span className="badge bg-danger">Rejected</span>
-                                )}
+                                  )}
+                                  
+                                  {/* Show Reset to Pending button if already approved or rejected */}
+                                  {restaurant.is_approved !== null && (
+                                    <button 
+                                      style={{...styles.btnOutline, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}
+                                      onClick={() => {
+                                        // Confirm before resetting to pending
+                                        if (window.confirm(`Reset ${restaurant.name} to Pending Approval?`)) {
+                                          const token = localStorage.getItem('token');
+                                          if (!token) {
+                                            alert('Authentication required');
+                                            return;
+                                          }
+                                          
+                                          // Call API to set is_approved to null (pending)
+                                          axios.patch(`${API_URL}/restaurants/restaurants/${restaurant.id}/`, { 
+                                            is_approved: null,
+                                            rejection_reason: null
+                                          }, {
+                                            headers: {
+                                              Authorization: `Token ${token}`,
+                                              'Content-Type': 'application/json'
+                                            }
+                                          })
+                                          .then(response => {
+                                            // Update local state
+                                            setAdminRestaurants(
+                                              Array.isArray(adminRestaurants) 
+                                                ? adminRestaurants.map(r => 
+                                                    r?.id === restaurant.id ? response.data : r
+                                                  )
+                                                : []
+                                            );
+                                            
+                                            setActionSuccess(`Restaurant ${restaurant.name} has been reset to Pending Approval.`);
+                                            
+                                            // Clear success message after 5 seconds
+                                            setTimeout(() => {
+                                              setActionSuccess(null);
+                                            }, 5000);
+                                          })
+                                          .catch(error => {
+                                            console.error('Error resetting restaurant status:', error);
+                                            alert(`Failed to reset restaurant: ${error.message || 'Unknown error'}`);
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      Reset to Pending
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -731,6 +781,10 @@ const AdminDashboard = () => {
                 style={approvalAction === 'approve' ? styles.btnSuccess : styles.btnDanger}
                 onClick={async () => {
                   try {
+                    // Get token from localStorage
+                    const token = localStorage.getItem('token');
+                    if (!token) throw new Error('Authentication required');
+                    
                     // Call the API directly to update restaurant status
                     const response = await axios.patch(`${API_URL}/restaurants/restaurants/${restaurantToApprove.id}/`, { 
                       is_approved: approvalAction === 'approve',

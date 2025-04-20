@@ -47,25 +47,63 @@ const CreateRestaurant = ({ isEdit = false, isAdmin = false }) => {
     }
   };
   
+  // State to track which owners already have restaurants
+  const [ownersWithRestaurants, setOwnersWithRestaurants] = useState([]);
+  
   // Fetch restaurant owners if admin
   useEffect(() => {
     if (isAdmin) {
-      const fetchRestaurantOwners = async () => {
+      const fetchRestaurantOwnersAndRestaurants = async () => {
         try {
           const token = localStorage.getItem('token');
           if (!token) return;
           
-          const response = await axios.get(`${API_URL}/users/?user_type=restaurant`, {
+          // Get all restaurant owners
+          const ownersResponse = await axios.get(`${API_URL}/users/users/?user_type=restaurant`, {
             headers: { Authorization: `Token ${token}` }
           });
           
-          setRestaurantOwners(response.data || []);
+          // Get all restaurants to check which owners already have restaurants
+          const restaurantsResponse = await axios.get(`${API_URL}/restaurants/restaurants/`, {
+            headers: { Authorization: `Token ${token}` }
+          });
+          
+          // Process owners data
+          let ownersData = [];
+          if (Array.isArray(ownersResponse.data)) {
+            ownersData = ownersResponse.data;
+          } else if (ownersResponse.data && typeof ownersResponse.data === 'object' && Array.isArray(ownersResponse.data.results)) {
+            ownersData = ownersResponse.data.results;
+          } else {
+            console.error('Unexpected owners response format:', ownersResponse.data);
+            ownersData = [];
+          }
+          
+          // Process restaurants data
+          let restaurantsData = [];
+          if (Array.isArray(restaurantsResponse.data)) {
+            restaurantsData = restaurantsResponse.data;
+          } else if (restaurantsResponse.data && typeof restaurantsResponse.data === 'object' && Array.isArray(restaurantsResponse.data.results)) {
+            restaurantsData = restaurantsResponse.data.results;
+          }
+          
+          // Extract owner IDs that already have restaurants
+          // Convert all IDs to strings for consistent comparison
+          const ownersWithRestaurantIds = restaurantsData
+            .filter(restaurant => restaurant.owner_id) // Filter out any null owner_id
+            .map(restaurant => restaurant.owner_id.toString());
+          
+          console.log('Owners with restaurants:', ownersWithRestaurantIds);
+          setOwnersWithRestaurants(ownersWithRestaurantIds);
+          
+          // Set restaurant owners
+          setRestaurantOwners(ownersData);
         } catch (err) {
-          console.error('Error fetching restaurant owners:', err);
+          console.error('Error fetching restaurant data:', err);
         }
       };
       
-      fetchRestaurantOwners();
+      fetchRestaurantOwnersAndRestaurants();
     }
   }, [isAdmin]);
 
@@ -118,9 +156,28 @@ const CreateRestaurant = ({ isEdit = false, isAdmin = false }) => {
     setSuccess(null);
     
     // Validate form
-    if (!validateForm()) {
+    if (!name) {
+      setError('Restaurant name is required');
       setLoading(false);
       return;
+    }
+    
+    // Validate owner selection for admin creating a new restaurant
+    if (isAdmin && !isEdit && !formData.owner_id) {
+      setError('Please select a restaurant owner');
+      setLoading(false);
+      return;
+    }
+    
+    // Check if selected owner already has a restaurant
+    if (isAdmin && !isEdit && formData.owner_id) {
+      // Convert to string for consistent comparison
+      const ownerId = formData.owner_id.toString();
+      if (ownersWithRestaurants.includes(ownerId)) {
+        setError('The selected owner already has a restaurant. Each owner can only have one restaurant.');
+        setLoading(false);
+        return;
+      }
     }
     
     try {
@@ -148,6 +205,7 @@ const CreateRestaurant = ({ isEdit = false, isAdmin = false }) => {
       
       // Add owner_id if admin is creating a restaurant
       if (isAdmin && !isEdit && formData.owner_id) {
+        console.log('Adding owner_id to restaurant data:', formData.owner_id);
         restaurantData.append('owner_id', formData.owner_id);
       }
       
@@ -369,11 +427,20 @@ const CreateRestaurant = ({ isEdit = false, isAdmin = false }) => {
                   required
                 >
                   <option value="">Select a restaurant owner</option>
-                  {restaurantOwners.map(owner => (
-                    <option key={owner.id} value={owner.id}>
-                      {owner.username} ({owner.email})
-                    </option>
-                  ))}
+                  {Array.isArray(restaurantOwners) ? restaurantOwners.map(owner => {
+                    // Convert to string for consistent comparison
+                    const ownerId = owner.id.toString();
+                    const hasRestaurant = ownersWithRestaurants.includes(ownerId);
+                    return (
+                      <option 
+                        key={owner.id} 
+                        value={owner.id}
+                        disabled={hasRestaurant}
+                      >
+                        {owner.username} ({owner.email}) {hasRestaurant ? '- Already has a restaurant' : ''}
+                      </option>
+                    );
+                  }) : <option value="">No restaurant owners found</option>}
                 </select>
                 <small className="form-text text-muted">Select the user who will own this restaurant</small>
               </div>
