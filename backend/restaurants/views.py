@@ -14,3 +14,13 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         
         # Write permissions are only allowed to the owner or admin
         return obj.owner == request.user or request.user.user_type == 'admin'
+
+class IsRestaurantOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Read permissions are allowed to any request
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        
+        # Write permissions are only allowed to the restaurant owner or admin
+        return obj.restaurant.owner == request.user or request.user.user_type == 'admin'
+
