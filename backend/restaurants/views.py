@@ -106,3 +106,31 @@ class IngredientViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve'] or self.request.method == 'GET':
             return [AllowAny()]
         return super().get_permissions()
+    
+    def get_queryset(self):
+        # Get restaurant_id from query parameters if provided
+        restaurant_id = self.request.query_params.get('restaurant', None)
+        
+        # Base queryset
+        queryset = Ingredient.objects.all()
+        
+        # Filter by restaurant if specified
+        if restaurant_id:
+            queryset = queryset.filter(restaurant_id=restaurant_id)
+            
+        # For non-admin users, only show ingredients from active and approved restaurants
+        if not (self.request.user.is_authenticated and self.request.user.user_type == 'admin'):
+            queryset = queryset.filter(restaurant__is_active=True, restaurant__is_approved=True)
+            
+        return queryset
+    
+    def perform_create(self, serializer):
+        restaurant_id = self.request.data.get('restaurant')
+        restaurant = get_object_or_404(Restaurant, id=restaurant_id)
+        
+        # Check if the user is the owner of the restaurant
+        if restaurant.owner != self.request.user and self.request.user.user_type != 'admin':
+            return Response({'detail': 'You do not have permission to add ingredients to this restaurant.'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        
+        serializer.save()
