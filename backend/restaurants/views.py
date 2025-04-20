@@ -76,3 +76,22 @@ class RestaurantViewSet(viewsets.ModelViewSet):
         serializer = IngredientSerializer(ingredients, many=True)
         return Response(serializer.data)
     
+    @action(detail=False, methods=['get'], url_path='my-restaurant', permission_classes=[IsAuthenticated])
+    def my_restaurant(self, request):
+        """Get the restaurant owned by the authenticated user"""
+        # Check if the user is a restaurant owner
+        if request.user.user_type != 'restaurant':
+            return Response(
+                {'detail': 'Only restaurant owners can access this endpoint.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            restaurant = Restaurant.objects.get(owner=request.user)
+            serializer = self.get_serializer(restaurant)
+            return Response(serializer.data)
+        except Restaurant.DoesNotExist:
+            return Response(
+                {'detail': 'You do not have a restaurant set up yet.'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
