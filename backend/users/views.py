@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import get_user_model
 from .models import UserProfile
 from .serializers import UserSerializer, UserProfileSerializer, UserRegistrationSerializer
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -44,4 +45,41 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def current_user(request):
     serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    """Custom endpoint to update both user and profile data in one request"""
+    user = request.user
+    
+    # Update user fields
+    if 'first_name' in request.data:
+        user.first_name = request.data['first_name']
+    if 'last_name' in request.data:
+        user.last_name = request.data['last_name']
+    if 'email' in request.data:
+        user.email = request.data['email']
+    if 'phone_number' in request.data:
+        user.phone_number = request.data['phone_number']
+    if 'address' in request.data:
+        user.address = request.data['address']
+    
+    # Save user changes
+    user.save()
+    
+    # Update or create profile
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    # Update profile fields
+    if 'bio' in request.data:
+        profile.bio = request.data['bio']
+    if 'favorite_cuisine' in request.data:
+        profile.favorite_cuisine = request.data['favorite_cuisine']
+    
+    # Save profile changes
+    profile.save()
+    
+    # Return updated user data
+    serializer = UserSerializer(user)
     return Response(serializer.data)

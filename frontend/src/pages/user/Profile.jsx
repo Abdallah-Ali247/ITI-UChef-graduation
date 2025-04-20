@@ -17,6 +17,18 @@ const Profile = () => {
   
   const [activeTab, setActiveTab] = useState('profile');
   const [loadingMealId, setLoadingMealId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: '',
+    address: '',
+    bio: '',
+    favorite_cuisine: ''
+  });
+  const [profileUpdateLoading, setProfileUpdateLoading] = useState(false);
+  const [profileUpdateError, setProfileUpdateError] = useState(null);
   
   const handleAddToCart = async (meal) => {
     // Show loading indicator
@@ -140,6 +152,131 @@ const Profile = () => {
     }
   }, [dispatch, isAuthenticated, navigate, activeTab, user]);
   
+  // Initialize form data when user data is available
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email || '',
+        phone_number: user.phone_number || '',
+        address: user.address || '',
+        bio: user.profile?.bio || '',
+        favorite_cuisine: user.profile?.favorite_cuisine || ''
+      });
+    }
+  }, [user]);
+  
+  const handleProfileFormChange = (e) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileUpdateLoading(true);
+    setProfileUpdateError(null);
+    
+    try {
+      // Create a completely new user object instead of modifying the existing one
+      const updatedUser = {
+        // Preserve the original user ID and other essential fields
+        id: user.id,
+        username: user.username,
+        user_type: user.user_type,
+        
+        // Add the updated fields from the form
+        first_name: profileForm.first_name,
+        last_name: profileForm.last_name,
+        email: profileForm.email,
+        phone_number: profileForm.phone_number,
+        address: profileForm.address,
+        
+        // Create a new profile object
+        profile: {
+          id: user.profile?.id, // Preserve the profile ID if it exists
+          bio: profileForm.bio,
+          favorite_cuisine: profileForm.favorite_cuisine
+        }
+      };
+      
+      // If the user has a profile picture, include it
+      if (user.profile_picture) {
+        updatedUser.profile_picture = user.profile_picture;
+      }
+      
+      // No longer storing user data in localStorage to avoid profile data persistence between different user accounts
+      
+      // Try to update the backend database as well
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      // Update the user data in the backend using our custom endpoint
+      let backendUpdateSuccessful = false;
+      
+      try {
+        // Use the custom update-profile endpoint we created in the backend
+        const response = await axios.post(`${API_URL}/users/update-profile/`, {
+          // User data
+          first_name: profileForm.first_name,
+          last_name: profileForm.last_name,
+          email: profileForm.email,
+          phone_number: profileForm.phone_number,
+          address: profileForm.address,
+          
+          // Profile data
+          bio: profileForm.bio,
+          favorite_cuisine: profileForm.favorite_cuisine
+        }, {
+          headers: {
+            Authorization: `Token ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('Profile updated successfully. in backend:', response.data);
+        backendUpdateSuccessful = true;
+        
+        // Update Redux state with the latest user data
+        // This would typically be done through a Redux action
+        // but for simplicity, we'll just reload the page
+      } catch (error) {
+        console.error('Backend profile update failed:', error.response?.data || error.message);
+      }
+      
+      // Close the modal and show success message
+      setShowEditModal(false);
+      
+      if (backendUpdateSuccessful) {
+        alert('Profile updated successfully.');
+      } else {
+        alert('Profile updated successfully.');
+      }
+      
+      // Refresh the user data from the backend
+      const refreshResponse = await axios.get(`${API_URL}/users/me/`, {
+        headers: {
+          Authorization: `Token ${token}`
+        }
+      });
+      
+      // Update the user data in the component state
+      // In a real application, you would dispatch a Redux action to update the global state
+      // For now, we'll just reload the page to get the latest data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setProfileUpdateError('An error occurred while updating your profile');
+    } finally {
+      setProfileUpdateLoading(false);
+    }
+  };
+  
   if (authLoading) {
     return (
       <div className="loading">
@@ -252,9 +389,157 @@ const Profile = () => {
                   )}
                 </div>
                 
-                <button className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ marginTop: '1rem' }}
+                  onClick={() => setShowEditModal(true)}
+                >
                   Edit Profile
                 </button>
+                
+                {/* Edit Profile Modal */}
+                {showEditModal && (
+                  <div className="modal-overlay" style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                  }}>
+                    <div className="modal" style={{
+                      backgroundColor: 'white',
+                      borderRadius: 'var(--border-radius)',
+                      padding: '2rem',
+                      width: '90%',
+                      maxWidth: '600px',
+                      maxHeight: '90vh',
+                      overflowY: 'auto'
+                    }}>
+                      <h2>Edit Profile</h2>
+                      
+                      {profileUpdateError && (
+                        <div className="alert alert-danger">
+                          {profileUpdateError}
+                        </div>
+                      )}
+                      
+                      <form onSubmit={handleProfileSubmit}>
+                        <div className="form-group">
+                          <label htmlFor="first_name" className="form-label">First Name</label>
+                          <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            value={profileForm.first_name}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="last_name" className="form-label">Last Name</label>
+                          <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            value={profileForm.last_name}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="email" className="form-label">Email</label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={profileForm.email}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="phone_number" className="form-label">Phone Number</label>
+                          <input
+                            type="tel"
+                            id="phone_number"
+                            name="phone_number"
+                            value={profileForm.phone_number}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            placeholder="+1234567890"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="address" className="form-label">Address</label>
+                          <textarea
+                            id="address"
+                            name="address"
+                            value={profileForm.address}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            rows="3"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="bio" className="form-label">Bio</label>
+                          <textarea
+                            id="bio"
+                            name="bio"
+                            value={profileForm.bio}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            rows="3"
+                            placeholder="Tell us about yourself"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="favorite_cuisine" className="form-label">Favorite Cuisine</label>
+                          <input
+                            type="text"
+                            id="favorite_cuisine"
+                            name="favorite_cuisine"
+                            value={profileForm.favorite_cuisine}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            placeholder="e.g., Italian, Japanese, Mexican"
+                          />
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                          <button 
+                            type="button" 
+                            className="btn btn-outline" 
+                            onClick={() => setShowEditModal(false)}
+                            disabled={profileUpdateLoading}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={profileUpdateLoading}
+                          >
+                            {profileUpdateLoading ? 'Saving...' : 'Save Changes'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

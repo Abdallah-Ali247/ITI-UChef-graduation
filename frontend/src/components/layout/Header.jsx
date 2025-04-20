@@ -30,15 +30,19 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 {/* Show different navigation based on user type */}
-                {user?.user_type === 'restaurant' ? (
+                {user?.user_type === 'restaurant' && (
                   <li className="nav-item">
                     <NavLink to="/restaurant-dashboard" className="nav-link">Restaurant Dashboard</NavLink>
                   </li>
-                ) : user?.user_type === 'admin' ? (
+                )}
+                
+                {user?.user_type === 'admin' && (
                   <li className="nav-item">
                     <NavLink to="/admin-dashboard" className="nav-link">Admin Dashboard</NavLink>
                   </li>
-                ) : (
+                )}
+                
+                {user?.user_type === 'customer' && (
                   <li className="nav-item">
                     <NavLink to="/orders" className="nav-link">My Orders</NavLink>
                   </li>

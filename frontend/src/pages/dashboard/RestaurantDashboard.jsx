@@ -532,7 +532,7 @@ const RestaurantDashboard = () => {
                   <div className="card-body" style={{ textAlign: 'center' }}>
                     <h3>
                       ${orders
-                        ? orders.reduce((total, order) => total + order.total_price, 0).toFixed(2)
+                        ? orders.reduce((total, order) => total + order.total_price, 0)
                         : '0.00'
                       }
                     </h3>

@@ -85,6 +85,34 @@ export const updateRestaurant = createAsyncThunk(
   }
 );
 
+export const updateRestaurantStatus = createAsyncThunk(
+  'restaurants/updateRestaurantStatus',
+  async ({ id, status, rejectionReason = null }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return rejectWithValue('Authentication required');
+      }
+      
+      const data = { 
+        is_approved: status === 'approved',
+        rejection_reason: rejectionReason
+      };
+      
+      const response = await axios.patch(`${API_URL}/restaurants/restaurants/${id}/`, data, {
+        headers: {
+          Authorization: `Token ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const initialState = {
   restaurants: [],
   currentRestaurant: null,
@@ -174,6 +202,24 @@ const restaurantSlice = createSlice({
       .addCase(updateRestaurant.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to update restaurant';
+      })
+      
+      // Update restaurant status (approve/reject)
+      .addCase(updateRestaurantStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateRestaurantStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the restaurant in the restaurants array
+        const index = state.restaurants.findIndex(r => r.id === action.payload.id);
+        if (index !== -1) {
+          state.restaurants[index] = action.payload;
+        }
+      })
+      .addCase(updateRestaurantStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to update restaurant status';
       });
   },
 });

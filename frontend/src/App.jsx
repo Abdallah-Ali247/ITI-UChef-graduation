@@ -28,6 +28,7 @@ import OrderDetail from './pages/orders/OrderDetail'
 import Profile from './pages/user/Profile'
 import RestaurantDashboard from './pages/dashboard/RestaurantDashboard'
 import AdminDashboard from './pages/dashboard/AdminDashboard'
+import AdminUserForm from './pages/admin/AdminUserForm'
 import NotFound from './pages/NotFound'
 
 // CSS
@@ -132,6 +133,31 @@ function App() {
             <Route path="/admin-dashboard" element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/add-user" element={
+              <ProtectedRoute>
+                <AdminUserForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/edit-user/:id" element={
+              <ProtectedRoute>
+                <AdminUserForm isEdit={true} />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/add-restaurant" element={
+              <ProtectedRoute>
+                <CreateRestaurant isAdmin={true} />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/edit-restaurant/:id" element={
+              <ProtectedRoute>
+                <CreateRestaurant isEdit={true} isAdmin={true} />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/orders/:id" element={
+              <ProtectedRoute>
+                <OrderDetail isAdmin={true} />
               </ProtectedRoute>
             } />
             

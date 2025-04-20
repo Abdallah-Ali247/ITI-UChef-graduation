@@ -124,13 +124,14 @@ const AdminDashboard = () => {
           // Fetch all data in parallel
           const [usersResponse, restaurantsResponse, ordersResponse] = await Promise.all([
             axios.get(`${API_URL}/users/users/`, { headers }),
-            axios.get(`${API_URL}/restaurants/restaurants/`, { headers }),
+            axios.get(`${API_URL}/restaurants/restaurants/?include_owner=true`, { headers }),
             axios.get(`${API_URL}/orders/orders/`, { headers })
           ]);
           
           // Update local state - ensure we're always setting arrays
           // For users, we need to handle the response format correctly
           const usersData = usersResponse.data;
+          console.log('Users API response:', usersData);
           setAdminUsers(Array.isArray(usersData) ? usersData : 
                         (usersData && typeof usersData === 'object' && usersData.results ? usersData.results : []));
           
@@ -159,10 +160,12 @@ const AdminDashboard = () => {
   const safeAdminRestaurants = Array.isArray(adminRestaurants) ? adminRestaurants : [];
   const safeAdminOrders = Array.isArray(adminOrders) ? adminOrders : [];
   
-  // Filter users based on search term and exclude admin users
+  // Filter users based on search term and exclude admins
   const filteredUsers = safeAdminUsers.filter(user => 
-    // Exclude admin users
-    user.user_type !== 'admin' && (
+    // First filter out admin users
+    (user?.user_type !== 'admin') &&
+    // Then apply search filter
+    (
       (user?.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) || 
       (user?.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user?.first_name && user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -258,41 +261,39 @@ const AdminDashboard = () => {
                 <div className="dashboard-stats" style={{ marginTop: '1.5rem' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
                     <div className="card">
-                      <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h3>{safeAdminUsers.length}</h3>
-                        <p>Total Users</p>
+                      <div className="card-body" style={{ textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{safeAdminUsers.length}</h3>
+                        <p style={{ fontSize: '1.2rem', color: '#666' }}>Total Users</p>
                       </div>
                     </div>
                     
                     <div className="card">
-                      <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h3>{safeAdminRestaurants.length}</h3>
-                        <p>Restaurants</p>
+                      <div className="card-body" style={{ textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{safeAdminRestaurants.length}</h3>
+                        <p style={{ fontSize: '1.2rem', color: '#666' }}>Restaurants</p>
                       </div>
                     </div>
                     
                     <div className="card">
-                      <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h3>{safeAdminOrders.length}</h3>
-                        <p>Total Orders</p>
+                      <div className="card-body" style={{ textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{safeAdminOrders.length}</h3>
+                        <p style={{ fontSize: '1.2rem', color: '#666' }}>Total Orders</p>
                       </div>
                     </div>
                     
                     <div className="card">
-                      <div className="card-body" style={{ textAlign: 'center' }}>
-                        <h3>
+                      <div className="card-body" style={{ textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
                           ${safeAdminOrders.length > 0
                             ? safeAdminOrders.reduce((total, order) => total + (parseFloat(order?.total_price) || 0), 0).toFixed(2)
                             : '0.00'
                           }
                         </h3>
-                        <p>Total Revenue</p>
+                        <p style={{ fontSize: '1.2rem', color: '#666' }}>Total Revenue</p>
                       </div>
                     </div>
                   </div>
                 </div>
-                
-                {/* Recent Activity section removed as requested */}
               </div>
             )}
             
@@ -447,21 +448,23 @@ const AdminDashboard = () => {
                                 </div>
                               </div>
                             </td>
-                            <td style={{ padding: '0.75rem' }}>{restaurant.owner_details?.username || 'N/A'}</td>
                             <td style={{ padding: '0.75rem' }}>
-                              <span className={`order-status ${restaurant.is_approved ? 'status-confirmed' : restaurant.is_approved === false ? 'status-cancelled' : 'status-pending'}`}>
-                                {restaurant.is_approved ? 'Approved' : restaurant.is_approved === false ? 'Rejected' : 'Pending Approval'}
-                              </span>
-                            </td>
+              {restaurant.owner ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span>{restaurant.owner.username || 'Unknown'}</span>
+                  {restaurant.owner.email && <span style={{ fontSize: '0.8rem', color: '#666' }}>({restaurant.owner.email})</span>}
+                </div>
+              ) : 'N/A'}
+            </td>
                             <td style={{ padding: '0.75rem' }}>
-                              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <Link to={`/admin/edit-restaurant/${restaurant.id}`} style={{...styles.btnOutline, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}>
-                                  Edit
-                                </Link>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span className={`order-status ${restaurant.is_approved ? 'status-confirmed' : restaurant.is_approved === false ? 'status-cancelled' : 'status-pending'}`}>
+                                  {restaurant.is_approved ? 'Approved' : restaurant.is_approved === false ? 'Rejected' : 'Pending Approval'}
+                                </span>
                                 {restaurant.is_approved === null && (
-                                  <div className="restaurant-card-actions">
+                                  <div style={{ display: 'flex', gap: '0.25rem' }}>
                                     <button 
-                                      style={{...styles.btnSuccess, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}
+                                      style={{...styles.btnSuccess, fontSize: '0.75rem', padding: '0.15rem 0.35rem'}}
                                       onClick={() => {
                                         setRestaurantToApprove(restaurant);
                                         setApprovalAction('approve');
@@ -471,7 +474,7 @@ const AdminDashboard = () => {
                                       Approve
                                     </button>
                                     <button 
-                                      style={{...styles.btnDanger, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}
+                                      style={{...styles.btnDanger, fontSize: '0.75rem', padding: '0.15rem 0.35rem'}}
                                       onClick={() => {
                                         setRestaurantToApprove(restaurant);
                                         setApprovalAction('reject');
@@ -483,11 +486,37 @@ const AdminDashboard = () => {
                                   </div>
                                 )}
                                 {restaurant.is_approved === true && (
-                                  <span className="badge bg-success">Approved</span>
+                                  <button 
+                                    style={{...styles.btnDanger, fontSize: '0.75rem', padding: '0.15rem 0.35rem'}}
+                                    onClick={() => {
+                                      setRestaurantToApprove(restaurant);
+                                      setApprovalAction('reject');
+                                      setShowApprovalModal(true);
+                                    }}
+                                  >
+                                    Revoke
+                                  </button>
                                 )}
                                 {restaurant.is_approved === false && (
-                                  <span className="badge bg-danger">Rejected</span>
+                                  <button 
+                                    style={{...styles.btnSuccess, fontSize: '0.75rem', padding: '0.15rem 0.35rem'}}
+                                    onClick={() => {
+                                      setRestaurantToApprove(restaurant);
+                                      setApprovalAction('approve');
+                                      setShowApprovalModal(true);
+                                    }}
+                                  >
+                                    Approve
+                                  </button>
                                 )}
+                              </div>
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <Link to={`/admin/edit-restaurant/${restaurant.id}`} style={{...styles.btnOutline, fontSize: '0.875rem', padding: '0.25rem 0.5rem'}}>
+                                  Edit
+                                </Link>
+                                {/* Actions moved to the Status column */}
                               </div>
                             </td>
                           </tr>
@@ -587,12 +616,31 @@ const AdminDashboard = () => {
               </div>
             )}
             
-            {/* Settings Tab removed as requested */}
-          </div>
-        </div>
-      )}
-      
-      {/* Delete User Confirmation Modal */}
+            {/* Delete User Confirmation Modal */}
+            {showDeleteModal && (
+              <div className="modal-backdrop">
+                <div className="modal-content" style={{ maxWidth: '500px' }}>
+                  <div className="modal-header">
+                    <h3>Delete User</h3>
+                    <button 
+                      className="close-btn" 
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        setUserToDelete(null);
+                        setDeleteError(null);
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <div className="modal-body">
+                    {deleteError && (
+                      <div className="alert alert-danger">
+                        {deleteError}
+                      </div>
+                    )}
+                    <p>Are you sure you want to delete the user <strong>{userToDelete?.username}</strong>?</p>
+                    <p>This action cannot be undone and will remove all data associated with this user.</p>
       {showDeleteModal && (
         <div className="modal-backdrop">
           <div className="modal-content" style={{ maxWidth: '500px' }}>
@@ -732,6 +780,7 @@ const AdminDashboard = () => {
                 onClick={async () => {
                   try {
                     // Call the API directly to update restaurant status
+                    console.log(`Updating restaurant ${restaurantToApprove.id} status to ${approvalAction}`);
                     const response = await axios.patch(`${API_URL}/restaurants/restaurants/${restaurantToApprove.id}/`, { 
                       is_approved: approvalAction === 'approve',
                       rejection_reason: approvalAction === 'reject' ? rejectionReason : null
@@ -741,6 +790,8 @@ const AdminDashboard = () => {
                         'Content-Type': 'application/json'
                       }
                     });
+                    
+                    console.log('Restaurant update response:', response.data);
                     
                     // Update local state - ensure we're working with arrays
                     setAdminRestaurants(
