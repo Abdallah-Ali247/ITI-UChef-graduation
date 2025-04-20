@@ -60,3 +60,11 @@ class RestaurantViewSet(viewsets.ModelViewSet):
             
             # Regular restaurant owner creating their own restaurant
             serializer.save(owner=self.request.user)
+    
+    @action(detail=True, methods=['get'])
+    def meals(self, request, pk=None):
+        restaurant = self.get_object()
+        meals = restaurant.meals.all()
+        from meals.serializers import MealSerializer
+        serializer = MealSerializer(meals, many=True)
+        return Response(serializer.data)
