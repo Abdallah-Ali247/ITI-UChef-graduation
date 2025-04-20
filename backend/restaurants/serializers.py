@@ -57,3 +57,16 @@ class RestaurantSerializer(serializers.ModelSerializer):
             # Default behavior: use the requesting user as owner
             restaurant = Restaurant.objects.create(owner=request.user, **validated_data)
         return restaurant
+        
+    def update(self, instance, validated_data):
+        # Set is_active based on approval status if approval status is being updated
+        if 'is_approved' in validated_data:
+            is_approved = validated_data.get('is_approved')
+            validated_data['is_active'] = bool(is_approved)  # Active only if approved (True), not if pending (None) or rejected (False)
+        
+        # Update all fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
