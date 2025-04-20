@@ -24,3 +24,18 @@ class IsRestaurantOwnerOrReadOnly(permissions.BasePermission):
         # Write permissions are only allowed to the restaurant owner or admin
         return obj.restaurant.owner == request.user or request.user.user_type == 'admin'
 
+class RestaurantViewSet(viewsets.ModelViewSet):
+    serializer_class = RestaurantSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'description', 'address']
+    ordering_fields = ['name', 'created_at']
+    
+    def get_queryset(self):
+        # For admin users, show all restaurants
+        if self.request.user.is_authenticated and self.request.user.user_type == 'admin':
+            return Restaurant.objects.all()
+            
+        # For public users, only show active and approved restaurants
+        return Restaurant.objects.filter(is_active=True, is_approved=True)
+    
