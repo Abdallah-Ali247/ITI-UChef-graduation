@@ -70,3 +70,12 @@ class RestaurantSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
+
+class IngredientSerializer(serializers.ModelSerializer):
+    restaurant_name = serializers.ReadOnlyField(source='restaurant.name')
+    
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name', 'description', 'quantity', 'unit', 
+                  'price_per_unit', 'is_available', 'restaurant', 'restaurant_name']
+        read_only_fields = ['id']
