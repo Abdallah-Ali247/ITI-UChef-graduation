@@ -68,3 +68,11 @@ class RestaurantViewSet(viewsets.ModelViewSet):
         from meals.serializers import MealSerializer
         serializer = MealSerializer(meals, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def ingredients(self, request, pk=None):
+        restaurant = self.get_object()
+        ingredients = restaurant.ingredients.all()
+        serializer = IngredientSerializer(ingredients, many=True)
+        return Response(serializer.data)
+    
