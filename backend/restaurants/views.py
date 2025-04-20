@@ -39,3 +39,24 @@ class RestaurantViewSet(viewsets.ModelViewSet):
         # For public users, only show active and approved restaurants
         return Restaurant.objects.filter(is_active=True, is_approved=True)
     
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return super().get_permissions()
+    
+    def perform_create(self, serializer):
+        # For admin users, the owner_id is handled in the serializer's create method
+        # For regular restaurant owners, use the current user
+        if self.request.user.user_type == 'admin' and 'owner_id' in self.request.data:
+            # Let the serializer handle it
+            serializer.save()
+        else:
+            # Check if the user already has a restaurant
+            from django.db.models import Q
+            existing_restaurant = Restaurant.objects.filter(owner=self.request.user).exists()
+            if existing_restaurant:
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({'owner': 'You already have a restaurant. Each user can only have one restaurant.'})
+            
+            # Regular restaurant owner creating their own restaurant
+            serializer.save(owner=self.request.user)
