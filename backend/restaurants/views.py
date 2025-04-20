@@ -97,7 +97,6 @@ class RestaurantViewSet(viewsets.ModelViewSet):
             )
 
 class IngredientViewSet(viewsets.ModelViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAuthenticated, IsRestaurantOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter]
@@ -109,10 +108,21 @@ class IngredientViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
     
     def get_queryset(self):
+        # Get restaurant_id from query parameters if provided
         restaurant_id = self.request.query_params.get('restaurant', None)
+        
+        # Base queryset
+        queryset = Ingredient.objects.all()
+        
+        # Filter by restaurant if specified
         if restaurant_id:
-            return Ingredient.objects.filter(restaurant_id=restaurant_id)
-        return Ingredient.objects.all()
+            queryset = queryset.filter(restaurant_id=restaurant_id)
+            
+        # For non-admin users, only show ingredients from active and approved restaurants
+        if not (self.request.user.is_authenticated and self.request.user.user_type == 'admin'):
+            queryset = queryset.filter(restaurant__is_active=True, restaurant__is_approved=True)
+            
+        return queryset
     
     def perform_create(self, serializer):
         restaurant_id = self.request.data.get('restaurant')

@@ -31,6 +31,11 @@ class RestaurantSerializer(serializers.ModelSerializer):
         owner_id = validated_data.pop('owner_id', None)
         request = self.context.get('request')
         
+        # Set is_active based on approval status
+        is_approved = validated_data.get('is_approved', None)
+        if is_approved is not None:
+            validated_data['is_active'] = is_approved  # Active only if approved
+        
         # If owner_id is provided and user is admin, use that owner
         if owner_id and request and request.user.user_type == 'admin':
             from django.contrib.auth import get_user_model
@@ -52,6 +57,19 @@ class RestaurantSerializer(serializers.ModelSerializer):
             # Default behavior: use the requesting user as owner
             restaurant = Restaurant.objects.create(owner=request.user, **validated_data)
         return restaurant
+        
+    def update(self, instance, validated_data):
+        # Set is_active based on approval status if approval status is being updated
+        if 'is_approved' in validated_data:
+            is_approved = validated_data.get('is_approved')
+            validated_data['is_active'] = bool(is_approved)  # Active only if approved (True), not if pending (None) or rejected (False)
+        
+        # Update all fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
 
 class IngredientSerializer(serializers.ModelSerializer):
     restaurant_name = serializers.ReadOnlyField(source='restaurant.name')
