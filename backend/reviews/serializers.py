@@ -12,3 +12,13 @@ class RestaurantReviewSerializer(serializers.ModelSerializer):
                   'rating', 'comment', 'created_at', 'updated_at']
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']  # Add user to read_only_fields
 
+class MealReviewSerializer(serializers.ModelSerializer):
+    user_username = serializers.ReadOnlyField(source='user.username')
+    meal_name = serializers.ReadOnlyField(source='meal.name')
+    user = serializers.PrimaryKeyRelatedField(read_only=True)  # Make user field read-only
+    
+    class Meta:
+        model = MealReview
+        fields = ['id', 'user', 'user_username', 'meal', 'meal_name', 
+                  'rating', 'comment', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']  # Add user to read_only_fields
