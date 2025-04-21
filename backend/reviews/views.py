@@ -14,4 +14,24 @@ class IsReviewOwnerOrReadOnly(permissions.BasePermission):
         # Write permissions are only allowed to the review owner or admin
         return obj.user == request.user or request.user.user_type == 'admin'
 
-
+class RestaurantReviewViewSet(viewsets.ModelViewSet):
+    queryset = RestaurantReview.objects.all()
+    serializer_class = RestaurantReviewSerializer
+    permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at', 'rating']
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return super().get_permissions()
+    
+    def get_queryset(self):
+        restaurant_id = self.request.query_params.get('restaurant', None)
+        if restaurant_id:
+            return RestaurantReview.objects.filter(restaurant_id=restaurant_id)
+        return RestaurantReview.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
