@@ -11,13 +11,15 @@ const CustomMealDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector(state => state.auth);
+  const { isAuthenticated, user } = useSelector(state => state.auth);
   
   const [customMeal, setCustomMeal] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [isPublic, setIsPublic] = useState(false);
+  const [savingPublicStatus, setSavingPublicStatus] = useState(false);
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,7 +37,9 @@ const CustomMealDetail = () => {
           headers: token ? { Authorization: `Token ${token}` } : {}
         });
         
-        setCustomMeal(mealResponse.data);
+        const mealData = mealResponse.data;
+        setCustomMeal(mealData);
+        setIsPublic(mealData.is_public);
         
         // Fetch the ingredients for this custom meal
         const ingredientsResponse = await axios.get(`${API_URL}/meals/custom-meals/${id}/ingredients/`, {
@@ -58,6 +62,39 @@ const CustomMealDetail = () => {
     const value = parseInt(e.target.value);
     if (value > 0) {
       setQuantity(value);
+    }
+  };
+  
+  const handlePublicToggle = async () => {
+    if (!customMeal || !isAuthenticated) return;
+    
+    // Only the creator of the meal can change its public status
+    if (customMeal.user !== user.id) {
+      alert('Only the creator of this custom meal can change its visibility.');
+      return;
+    }
+    
+    try {
+      setSavingPublicStatus(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.patch(
+        `${API_URL}/meals/custom-meals/${id}/`, 
+        { is_public: !isPublic },
+        { headers: { Authorization: `Token ${token}` } }
+      );
+      
+      setIsPublic(response.data.is_public);
+      setCustomMeal({...customMeal, is_public: response.data.is_public});
+      
+      alert(response.data.is_public 
+        ? 'Your custom meal is now public and eligible for the Top Custom Meals page!' 
+        : 'Your custom meal is now private.');
+    } catch (err) {
+      console.error('Error updating meal visibility:', err);
+      alert('Failed to update meal visibility. Please try again.');
+    } finally {
+      setSavingPublicStatus(false);
     }
   };
   
@@ -197,6 +234,26 @@ const CustomMealDetail = () => {
             <h3>Description</h3>
             <p>{customMeal.description || 'No description provided.'}</p>
           </div>
+          
+          {/* Public/Private toggle - only shown to the meal creator */}
+          {isAuthenticated && user && customMeal && customMeal.user === user.id && (
+            <div className="visibility-toggle" style={{ marginBottom: '2rem', padding: '1rem', backgroundColor: 'var(--accent-light)', borderRadius: '8px' }}>
+              <h3>Meal Visibility</h3>
+              <p>
+                {isPublic 
+                  ? 'This meal is currently public and can be seen by all users. It is eligible for the Top Custom Meals page.'
+                  : 'This meal is currently private and can only be seen by you. Make it public to share with others and compete for the Top Custom Meals page!'}
+              </p>
+              <button 
+                className={`btn ${isPublic ? 'btn-outline' : 'btn-primary'}`}
+                onClick={handlePublicToggle}
+                disabled={savingPublicStatus}
+                style={{ marginTop: '0.5rem' }}
+              >
+                {savingPublicStatus ? 'Saving...' : (isPublic ? 'Make Private' : 'Make Public')}
+              </button>
+            </div>
+          )}
           
           {customMeal.cooking_instructions && (
             <div className="cooking-instructions" style={{ marginBottom: '2rem' }}>

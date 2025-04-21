@@ -26,6 +26,9 @@ const Header = () => {
             <li className="nav-item">
               <NavLink to="/restaurants" className="nav-link">Restaurants</NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink to="/top-custom-meals" className="nav-link">Top Custom Meals</NavLink>
+            </li>
             
             {isAuthenticated ? (
               <>

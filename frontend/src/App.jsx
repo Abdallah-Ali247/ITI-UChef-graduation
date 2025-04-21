@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getCurrentUser } from './store/slices/authSlice'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 // Layout components
 import Header from './components/layout/Header'
@@ -21,6 +23,7 @@ import AddIngredient from './pages/ingredients/AddIngredient'
 import EditIngredient from './pages/ingredients/EditIngredient'
 import CustomMealBuilder from './pages/meals/CustomMealBuilder'
 import CustomMealDetail from './pages/meals/CustomMealDetail'
+import TopCustomMeals from './pages/meals/TopCustomMeals'
 import Cart from './pages/cart/Cart'
 import Checkout from './pages/cart/Checkout'
 import OrderHistory from './pages/orders/OrderHistory'
@@ -57,6 +60,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
+        <ToastContainer position="top-right" autoClose={3000} />
         <Header />
         <main className="main-content">
           <Routes>
@@ -68,6 +72,7 @@ function App() {
             <Route path="/restaurants/:id" element={<RestaurantDetail />} />
             <Route path="/meals/:id" element={<MealDetail />} />
             <Route path="/meals/custom/:id" element={<CustomMealDetail />} />
+            <Route path="/top-custom-meals" element={<TopCustomMeals />} />
             
             {/* Protected routes */}
             <Route path="/custom-meal/:restaurantId" element={

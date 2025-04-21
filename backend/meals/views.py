@@ -65,7 +65,7 @@ class CustomMealViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'created_at']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'ingredients']:
+        if self.action in ['list', 'retrieve', 'ingredients', 'top_rated']:
             return [AllowAny()]
         return [IsAuthenticated()]
     
@@ -75,9 +75,17 @@ class CustomMealViewSet(viewsets.ModelViewSet):
         
         queryset = CustomMeal.objects.all()
         
-        # If not admin or restaurant owner, only show user's own meals or public meals
-        if self.request.user.user_type not in ['admin', 'restaurant']:
-            queryset = queryset.filter(user=self.request.user) | queryset.filter(is_public=True)
+        # Check if user is authenticated
+        if self.request.user.is_authenticated:
+            # If authenticated user is admin or restaurant owner, they can see all meals
+            if hasattr(self.request.user, 'user_type') and self.request.user.user_type in ['admin', 'restaurant']:
+                pass  # Keep the full queryset
+            else:
+                # Regular users can only see their own meals or public meals
+                queryset = queryset.filter(user=self.request.user) | queryset.filter(is_public=True)
+        else:
+            # Anonymous users can only see public meals
+            queryset = queryset.filter(is_public=True)
         
         if user_id:
             queryset = queryset.filter(user_id=user_id)
@@ -112,3 +120,38 @@ class CustomMealViewSet(viewsets.ModelViewSet):
         ingredients = CustomMealIngredient.objects.filter(custom_meal=custom_meal)
         serializer = CustomMealIngredientSerializer(ingredients, many=True)
         return Response(serializer.data)
+        
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny], url_path='top-rated', url_name='top-rated')
+    def top_rated(self, request):
+        """Get top-rated custom meals"""
+        try:
+            # Only include public meals
+            queryset = CustomMeal.objects.filter(is_public=True)
+            
+            # Annotate with average rating and review count
+            from django.db.models import Avg, Count
+            queryset = queryset.annotate(
+                avg_rating=Avg('reviews__rating'),
+                review_count=Count('reviews')
+            )
+            
+            # Filter meals with at least one review
+            queryset = queryset.filter(review_count__gt=0)
+            
+            # Order by average rating (descending) and then by review count (descending)
+            queryset = queryset.order_by('-avg_rating', '-review_count')
+            
+            # Limit to top 10 meals
+            limit = int(request.query_params.get('limit', 10))
+            queryset = queryset[:limit]
+            
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in top_rated: {str(e)}")
+            
+            # Return an empty list instead of an error
+            return Response([])
