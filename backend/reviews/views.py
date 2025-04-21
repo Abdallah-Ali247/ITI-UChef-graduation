@@ -47,4 +47,8 @@ class MealReviewViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return super().get_permissions()
     
-    
+    def get_queryset(self):
+        meal_id = self.request.query_params.get('meal', None)
+        if meal_id:
+            return MealReview.objects.filter(meal_id=meal_id)
+        return MealReview.objects.all()   
