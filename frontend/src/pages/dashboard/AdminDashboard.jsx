@@ -612,7 +612,7 @@ const AdminDashboard = () => {
                         {filteredOrders.map(order => (
                           <tr key={order.id} style={{ borderBottom: '1px solid var(--light-gray)' }}>
                             <td style={{ padding: '0.75rem' }}>{order.id}</td>
-                            <td style={{ padding: '0.75rem' }}>{order.user_details?.username || 'Anonymous'}</td>
+                            <td style={{ padding: '0.75rem' }}>{order.user_username  || 'Anonymous'}</td>
                             <td style={{ padding: '0.75rem' }}>{order.restaurant_name}</td>
                             <td style={{ padding: '0.75rem' }}>${order.total_price}</td>
                             <td style={{ padding: '0.75rem' }}>

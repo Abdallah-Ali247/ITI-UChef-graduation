@@ -532,7 +532,7 @@ const RestaurantDashboard = () => {
                   <div className="card-body" style={{ textAlign: 'center' }}>
                     <h3>
                       ${orders
-                        ? orders.reduce((total, order) => total + order.total_price, 0)
+                        ? orders.reduce((total, order) => total + parseFloat(order?.total_price || 0), 0).toFixed(2)
                         : '0.00'
                       }
                     </h3>
@@ -566,13 +566,15 @@ const RestaurantDashboard = () => {
             ) : (
               <div className="orders-list">
                 {orders.map(order => (
+                  
                   <div key={order.id} className="card" style={{ marginBottom: '1rem' }}>
                     <div className="card-body">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
+
                           <h3>Order #{order.id}</h3>
                           <p><small>{new Date(order.created_at).toLocaleString()}</small></p>
-                          <p><strong>Customer:</strong> {order.user_details?.username || 'Anonymous'}</p>
+                          <p><strong>Customer:</strong> {order.user_username || 'Anonymous'}</p>
                           <p><strong>Total:</strong> ${order.total_price}</p>
                           <p><strong>Delivery Address:</strong> {order.delivery_address}</p>
                           
