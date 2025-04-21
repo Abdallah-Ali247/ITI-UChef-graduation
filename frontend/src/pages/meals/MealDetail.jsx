@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMealById } from '../../store/slices/mealSlice';
 import { addToCart } from '../../store/slices/cartSlice';
+import ReviewList from '../../components/reviews/ReviewList';
 
 const MealDetail = () => {
   const { id } = useParams();
@@ -161,6 +162,11 @@ const MealDetail = () => {
             </div>
           )}
         </div>
+      </div>
+      
+      <div className="meal-reviews" style={{ marginTop: '3rem' }}>
+        <h2>Customer Reviews</h2>
+        <ReviewList type="meal" itemId={id} />
       </div>
     </div>
   );

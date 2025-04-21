@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { addToCart } from '../../store/slices/cartSlice';
+import ReviewList from '../../components/reviews/ReviewList';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -241,6 +242,11 @@ const CustomMealDetail = () => {
             </button>
           </div>
         </div>
+      </div>
+      
+      <div className="custom-meal-reviews" style={{ marginTop: '3rem' }}>
+        <h2>Customer Reviews</h2>
+        <ReviewList type="custom_meal" itemId={id} />
       </div>
     </div>
   );

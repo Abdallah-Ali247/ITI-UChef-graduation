@@ -1,4 +1,5 @@
 /* Main CSS for UChef Application */
+@import url('../../styles/reviews.css');
 
 :root {
   --primary-color: #ff6b6b;

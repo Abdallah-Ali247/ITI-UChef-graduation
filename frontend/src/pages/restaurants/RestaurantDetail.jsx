@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRestaurantById, fetchRestaurantIngredients } from '../../store/slices/restaurantSlice';
 import { fetchMeals } from '../../store/slices/mealSlice';
 import { addToCart } from '../../store/slices/cartSlice';
+import ReviewList from '../../components/reviews/ReviewList';
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -109,6 +110,12 @@ const RestaurantDetail = () => {
         >
           Create Custom Meal
         </div>
+        <div 
+          className={`menu-tab ${activeTab === 'reviews' ? 'active' : ''}`}
+          onClick={() => setActiveTab('reviews')}
+        >
+          Reviews
+        </div>
       </div>
       
       {activeTab === 'menu' ? (
@@ -161,7 +168,7 @@ const RestaurantDetail = () => {
             ))
           )}
         </div>
-      ) : (
+      ) : activeTab === 'custom' ? (
         <div className="custom-meal-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2>Create Your Custom Meal</h2>
@@ -197,7 +204,12 @@ const RestaurantDetail = () => {
             </div>
           )}
         </div>
-      )}
+      ) : activeTab === 'reviews' ? (
+        <div className="reviews-section-container">
+          <h2>Customer Reviews</h2>
+          <ReviewList type="restaurant" itemId={id} />
+        </div>
+      ) : null}
     </div>
   );
 };
