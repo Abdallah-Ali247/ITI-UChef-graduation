@@ -11,4 +11,9 @@ class RestaurantReview(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-# Create your models here.
+
+    class Meta:
+        unique_together = ('user', 'restaurant')
+    
+    def __str__(self):
+        return f"Review for {self.restaurant.name} by {self.user.username}"
