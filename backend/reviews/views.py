@@ -52,3 +52,7 @@ class MealReviewViewSet(viewsets.ModelViewSet):
         if meal_id:
             return MealReview.objects.filter(meal_id=meal_id)
         return MealReview.objects.all()   
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
