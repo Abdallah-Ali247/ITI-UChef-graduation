@@ -30,4 +30,9 @@ class MealReviewAdmin(admin.ModelAdmin):
     list_filter = ('rating', 'created_at', 'meal__restaurant')
     search_fields = ('meal__name', 'user__username', 'comment')
     readonly_fields = ('created_at', 'updated_at')
+
+    def comment_preview(self, obj):
+        return obj.comment[:50] + '...' if len(obj.comment) > 50 else obj.comment
+    comment_preview.short_description = 'Comment'
+
     
