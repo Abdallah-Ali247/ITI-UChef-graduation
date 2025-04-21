@@ -35,3 +35,9 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
     
+class MealReviewViewSet(viewsets.ModelViewSet):
+    queryset = MealReview.objects.all()
+    serializer_class = MealReviewSerializer
+    permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at', 'rating']
