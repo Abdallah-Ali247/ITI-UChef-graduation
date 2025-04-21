@@ -41,3 +41,10 @@ class MealReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at', 'rating']
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return super().get_permissions()
+    
+    
