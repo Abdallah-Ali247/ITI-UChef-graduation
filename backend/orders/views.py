@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Order, OrderItem, Payment
 from restaurants.models import Restaurant
-
+from .serializers import OrderSerializer, OrderItemSerializer, PaymentSerializer
 class IsOrderOwnerOrRestaurantOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Allow if user is the order owner
