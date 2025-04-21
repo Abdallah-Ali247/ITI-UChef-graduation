@@ -4,7 +4,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Order, OrderItem, Payment
-from .serializers import OrderSerializer, OrderItemSerializer, PaymentSerializer
 from restaurants.models import Restaurant
 
 class IsOrderOwnerOrRestaurantOwnerOrAdmin(permissions.BasePermission):
