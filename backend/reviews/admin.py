@@ -35,4 +35,13 @@ class MealReviewAdmin(admin.ModelAdmin):
         return obj.comment[:50] + '...' if len(obj.comment) > 50 else obj.comment
     comment_preview.short_description = 'Comment'
 
-    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # If user is not a superuser and is a restaurant owner, only show their restaurant's meal reviews
+        if not request.user.is_superuser and request.user.user_type == 'restaurant':
+            try:
+                restaurant = request.user.restaurant
+                return qs.filter(meal__restaurant=restaurant)
+            except:
+                return qs.none()
+        return qs
