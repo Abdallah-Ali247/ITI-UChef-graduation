@@ -23,3 +23,11 @@ class RestaurantReviewAdmin(admin.ModelAdmin):
             except:
                 return qs.none()
         return qs
+
+@admin.register(MealReview)
+class MealReviewAdmin(admin.ModelAdmin):
+    list_display = ('meal', 'user', 'rating', 'comment_preview', 'created_at')
+    list_filter = ('rating', 'created_at', 'meal__restaurant')
+    search_fields = ('meal__name', 'user__username', 'comment')
+    readonly_fields = ('created_at', 'updated_at')
+    
