@@ -56,3 +56,23 @@ class MealReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+class CustomMealReviewViewSet(viewsets.ModelViewSet):
+    queryset = CustomMealReview.objects.all()
+    serializer_class = CustomMealReviewSerializer
+    permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at', 'rating']
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [AllowAny()]
+        return super().get_permissions()
+    
+    def get_queryset(self):
+        custom_meal_id = self.request.query_params.get('custom_meal', None)
+        if custom_meal_id:
+            return CustomMealReview.objects.filter(custom_meal_id=custom_meal_id)
+        return CustomMealReview.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
