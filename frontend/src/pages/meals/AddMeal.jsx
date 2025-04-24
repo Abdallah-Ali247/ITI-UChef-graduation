@@ -15,8 +15,12 @@ const AddMeal = () => {
   const [error, setError] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [ingredientQuantities, setIngredientQuantities] = useState({});
+  const [ingredientOptional, setIngredientOptional] = useState({});
+  const [ingredientAdditionalPrices, setIngredientAdditionalPrices] = useState({});
   const [categories, setCategories] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(false);
+  const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -170,9 +174,35 @@ const AddMeal = () => {
       if (prevSelected.includes(ingredientId)) {
         return prevSelected.filter(id => id !== ingredientId);
       } else {
+        // Initialize quantity to 1 when ingredient is selected
+        setIngredientQuantities(prev => ({
+          ...prev,
+          [ingredientId]: 1
+        }));
         return [...prevSelected, ingredientId];
       }
     });
+  };
+  
+  const handleIngredientQuantityChange = (ingredientId, quantity) => {
+    setIngredientQuantities(prev => ({
+      ...prev,
+      [ingredientId]: Math.max(0.1, parseFloat(quantity))
+    }));
+  };
+  
+  const handleIngredientOptionalChange = (ingredientId, isOptional) => {
+    setIngredientOptional(prev => ({
+      ...prev,
+      [ingredientId]: isOptional
+    }));
+  };
+  
+  const handleIngredientAdditionalPriceChange = (ingredientId, price) => {
+    setIngredientAdditionalPrices(prev => ({
+      ...prev,
+      [ingredientId]: parseFloat(price) || 0
+    }));
   };
   
   const handleSubmit = async e => {
@@ -194,26 +224,31 @@ const AddMeal = () => {
         return;
       }
       
-      // Create FormData object for file upload
+      // Create FormData object
       const mealData = new FormData();
       mealData.append('name', name);
       mealData.append('description', description);
       mealData.append('base_price', base_price);
       mealData.append('category', category);
+      mealData.append('restaurant', currentRestaurant.id);
       mealData.append('preparation_time', preparation_time);
       mealData.append('is_available', is_available);
       mealData.append('is_customizable', is_customizable);
-      mealData.append('restaurant', currentRestaurant.id);
       
-      // Add selected ingredients
-      selectedIngredients.forEach(ingredientId => {
-        mealData.append('ingredients', ingredientId);
-      });
-      
-      // Add image if provided
       if (formData.image) {
         mealData.append('image', formData.image);
       }
+      
+      // Prepare ingredients data with quantities
+      const ingredientsData = selectedIngredients.map(ingredientId => ({
+        ingredient: ingredientId,
+        quantity: ingredientQuantities[ingredientId] || 1,
+        is_optional: ingredientOptional[ingredientId] || false,
+        additional_price: ingredientAdditionalPrices[ingredientId] || 0
+      }));
+      
+      // Add ingredients data to request
+      mealData.append('ingredients', JSON.stringify(ingredientsData));
       
       const response = await axios.post(
         `${API_URL}/meals/meals/`,
@@ -448,23 +483,165 @@ const AddMeal = () => {
             {ingredients.length > 0 && (
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
                 <label className="form-label">Ingredients</label>
+                <p className="text-muted">Select ingredients and specify quantities for this meal</p>
+                
+                <div className="ingredient-search" style={{ marginBottom: '1rem' }}>
+                  <div className="search-input-container" style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      placeholder="Search ingredients..."
+                      value={ingredientSearchQuery}
+                      onChange={(e) => setIngredientSearchQuery(e.target.value)}
+                      className="form-control"
+                    />
+                    {ingredientSearchQuery && (
+                      <button 
+                        className="clear-search" 
+                        onClick={() => setIngredientSearchQuery('')}
+                        style={{ 
+                          position: 'absolute', 
+                          right: '10px', 
+                          top: '50%', 
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  {selectedIngredients.length > 0 && (
+                    <div className="selected-count" style={{ marginTop: '0.5rem' }}>
+                      {selectedIngredients.length} ingredient{selectedIngredients.length !== 1 ? 's' : ''} selected
+                    </div>
+                  )}
+                </div>
+                
                 <div className="ingredients-list" style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                  gap: '0.5rem'
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: '1rem'
                 }}>
-                  {ingredients.map(ingredient => (
-                    <div key={ingredient.id} className="form-check">
-                      <input
-                        type="checkbox"
-                        id={`ingredient-${ingredient.id}`}
-                        checked={selectedIngredients.includes(ingredient.id)}
-                        onChange={() => handleIngredientToggle(ingredient.id)}
-                        className="form-check-input"
-                      />
-                      <label htmlFor={`ingredient-${ingredient.id}`} className="form-check-label">
-                        {ingredient.name}
-                      </label>
+                  {ingredients
+                    .filter(ingredient => 
+                      ingredient.name.toLowerCase().includes(ingredientSearchQuery.toLowerCase()) ||
+                      (ingredient.description && ingredient.description.toLowerCase().includes(ingredientSearchQuery.toLowerCase()))
+                    )
+                    .map(ingredient => (
+                    <div key={ingredient.id} className="ingredient-item" style={{
+                      border: '1px solid #ddd',
+                      borderRadius: '5px',
+                      padding: '10px',
+                      backgroundColor: selectedIngredients.includes(ingredient.id) ? '#f8f9fa' : 'transparent'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                        <input
+                          type="checkbox"
+                          id={`ingredient-${ingredient.id}`}
+                          checked={selectedIngredients.includes(ingredient.id)}
+                          onChange={() => handleIngredientToggle(ingredient.id)}
+                          className="form-check-input"
+                          style={{ marginRight: '8px' }}
+                        />
+                        <label htmlFor={`ingredient-${ingredient.id}`} className="form-check-label fw-bold">
+                          {ingredient.name}
+                        </label>
+                      </div>
+                      
+                      {selectedIngredients.includes(ingredient.id) && (
+                        <div style={{ paddingLeft: '24px' }}>
+                          <div className="mb-2">
+                            <label htmlFor={`quantity-${ingredient.id}`} className="form-label small">Quantity:</label>
+                            <input
+                              type="number"
+                              id={`quantity-${ingredient.id}`}
+                              value={ingredientQuantities[ingredient.id] || 1}
+                              onChange={(e) => handleIngredientQuantityChange(ingredient.id, e.target.value)}
+                              className="form-control form-control-sm"
+                              min="0.1"
+                              step="0.1"
+                              style={{ width: '100px' }}
+                            />
+                            <small className="text-muted ms-2">{ingredient.unit}</small>
+                          </div>
+                          
+                          {/* <div className="mb-2 form-check">
+                            <input
+                              type="checkbox"
+                              id={`optional-${ingredient.id}`}
+                              checked={ingredientOptional[ingredient.id] || false}
+                              onChange={(e) => handleIngredientOptionalChange(ingredient.id, e.target.checked)}
+                              className="form-check-input"
+                            />
+                            <label htmlFor={`optional-${ingredient.id}`} className="form-check-label small">
+                              Optional ingredient
+                            </label>
+                          </div> */}
+                          
+                          {/* <div>
+                            <label htmlFor={`price-${ingredient.id}`} className="form-label small">Additional price:</label>
+                            <input
+                              type="number"
+                              id={`price-${ingredient.id}`}
+                              value={ingredientAdditionalPrices[ingredient.id] || 0}
+                              onChange={(e) => handleIngredientAdditionalPriceChange(ingredient.id, e.target.value)}
+                              className="form-control form-control-sm"
+                              min="0"// Add to your state
+                              const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
+                              
+                              // Add a filter function
+                              const filteredIngredients = ingredients.filter(ingredient => 
+                                ingredient.name.toLowerCase().includes(ingredientSearchQuery.toLowerCase()) ||
+                                (ingredient.description && ingredient.description.toLowerCase().includes(ingredientSearchQuery.toLowerCase()))
+                              );
+                              
+                              // Then in your render, above the ingredients grid:
+                              <div className="ingredient-search" style={{ marginBottom: '1rem' }}>
+                                <div className="search-input-container" style={{ position: 'relative' }}>
+                                  <input
+                                    type="text"
+                                    placeholder="Search ingredients..."
+                                    value={ingredientSearchQuery}
+                                    onChange={(e) => setIngredientSearchQuery(e.target.value)}
+                                    className="form-control"
+                                  />
+                                  {ingredientSearchQuery && (
+                                    <button 
+                                      className="clear-search" 
+                                      onClick={() => setIngredientSearchQuery('')}
+                                      style={{ 
+                                        position: 'absolute', 
+                                        right: '10px', 
+                                        top: '50%', 
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                      }}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
+                                {selectedIngredients.length > 0 && (
+                                  <div className="selected-count" style={{ marginTop: '0.5rem' }}>
+                                    {selectedIngredients.length} ingredient{selectedIngredients.length !== 1 ? 's' : ''} selected
+                                  </div>
+                                )}
+                              </div>
+                              
+                              // And modify your ingredients mapping to use filteredIngredients:
+                              {filteredIngredients.map(ingredient => (
+                                // Your existing ingredient item code
+                              ))}
+                              step="0.01"
+                              style={{ width: '100px' }}
+                            />
+                          </div> */}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

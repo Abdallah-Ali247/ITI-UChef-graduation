@@ -107,7 +107,9 @@ const OrderHistory = () => {
               <ul>
                 {order.items.map(item => (
                   <li key={item.id} className="order-item">
-                    {item.meal_details ? item.meal_details.name : item.custom_meal_details.name} 
+                    {item.meal_details ? item.meal_details.name : 
+                     item.custom_meal_details ? item.custom_meal_details.name : 
+                     `Meal #${item.meal || item.custom_meal}`} 
                     x {item.quantity} - ${item.price * item.quantity}
                   </li>
                 ))}

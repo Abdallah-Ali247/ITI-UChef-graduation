@@ -54,7 +54,34 @@ class MealViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'You do not have permission to add meals to this restaurant.'}, 
                            status=status.HTTP_403_FORBIDDEN)
         
-        serializer.save()
+        # Save the meal
+        meal = serializer.save()
+        
+        # Process the ingredients for the meal
+        ingredients_data = self.request.data.get('ingredients', '[]')
+        # Parse the JSON string into a Python object
+        import json
+        try:
+            ingredients_data = json.loads(ingredients_data)
+        except json.JSONDecodeError:
+            # If parsing fails, use an empty list
+            ingredients_data = []
+            
+        for ingredient_data in ingredients_data:
+            ingredient_id = ingredient_data.get('ingredient')
+            quantity = ingredient_data.get('quantity', 0)
+            is_optional = ingredient_data.get('is_optional', False)
+            additional_price = ingredient_data.get('additional_price', 0)
+            
+            if ingredient_id and quantity > 0:
+                ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+                MealIngredient.objects.create(
+                    meal=meal,
+                    ingredient=ingredient,
+                    quantity=quantity,
+                    is_optional=is_optional,
+                    additional_price=additional_price
+                )
 
 class CustomMealViewSet(viewsets.ModelViewSet):
     queryset = CustomMeal.objects.all()

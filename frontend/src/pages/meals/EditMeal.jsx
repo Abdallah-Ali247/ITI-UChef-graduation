@@ -17,6 +17,9 @@ const EditMeal = () => {
   const [error, setError] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [selectedIngredients, setSelectedIngredients] = useState([]);
+  const [ingredientQuantities, setIngredientQuantities] = useState({});
+  const [ingredientOptional, setIngredientOptional] = useState({});
+  const [ingredientAdditionalPrices, setIngredientAdditionalPrices] = useState({});
   const [categories, setCategories] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(false);
   
@@ -88,9 +91,24 @@ const EditMeal = () => {
           is_customizable: meal.is_customizable !== undefined ? meal.is_customizable : false
         });
         
-        // If meal has ingredients, set them as selected
-        if (meal.ingredients && meal.ingredients.length > 0) {
-          setSelectedIngredients(meal.ingredients.map(ing => ing.id));
+        // If meal has ingredients, set them as selected and store their quantities
+        if (meal.meal_ingredients && meal.meal_ingredients.length > 0) {
+          const selectedIds = [];
+          const quantities = {};
+          const optionals = {};
+          const additionalPrices = {};
+          
+          meal.meal_ingredients.forEach(item => {
+            selectedIds.push(item.ingredient);
+            quantities[item.ingredient] = item.quantity;
+            optionals[item.ingredient] = item.is_optional;
+            additionalPrices[item.ingredient] = item.additional_price;
+          });
+          
+          setSelectedIngredients(selectedIds);
+          setIngredientQuantities(quantities);
+          setIngredientOptional(optionals);
+          setIngredientAdditionalPrices(additionalPrices);
         }
         
         setFetchLoading(false);
@@ -216,9 +234,35 @@ const EditMeal = () => {
       if (prevSelected.includes(ingredientId)) {
         return prevSelected.filter(id => id !== ingredientId);
       } else {
+        // Initialize quantity to 1 when ingredient is selected
+        setIngredientQuantities(prev => ({
+          ...prev,
+          [ingredientId]: 1
+        }));
         return [...prevSelected, ingredientId];
       }
     });
+  };
+  
+  const handleIngredientQuantityChange = (ingredientId, quantity) => {
+    setIngredientQuantities(prev => ({
+      ...prev,
+      [ingredientId]: Math.max(0.1, parseFloat(quantity))
+    }));
+  };
+  
+  const handleIngredientOptionalChange = (ingredientId, isOptional) => {
+    setIngredientOptional(prev => ({
+      ...prev,
+      [ingredientId]: isOptional
+    }));
+  };
+  
+  const handleIngredientAdditionalPriceChange = (ingredientId, price) => {
+    setIngredientAdditionalPrices(prev => ({
+      ...prev,
+      [ingredientId]: parseFloat(price) || 0
+    }));
   };
   
   const handleSubmit = async e => {
@@ -240,26 +284,31 @@ const EditMeal = () => {
         return;
       }
       
-      // Create FormData object for file upload
+      // Create FormData object
       const mealData = new FormData();
       mealData.append('name', name);
       mealData.append('description', description);
       mealData.append('base_price', base_price);
       mealData.append('category', category);
+      mealData.append('restaurant', currentRestaurant.id);
       mealData.append('preparation_time', preparation_time);
       mealData.append('is_available', is_available);
       mealData.append('is_customizable', is_customizable);
-      mealData.append('restaurant', currentRestaurant.id);
       
-      // Add selected ingredients
-      selectedIngredients.forEach(ingredientId => {
-        mealData.append('ingredients', ingredientId);
-      });
-      
-      // Add image if provided
       if (formData.image) {
         mealData.append('image', formData.image);
       }
+      
+      // Prepare ingredients data with quantities
+      const ingredientsData = selectedIngredients.map(ingredientId => ({
+        ingredient: ingredientId,
+        quantity: ingredientQuantities[ingredientId] || 1,
+        is_optional: ingredientOptional[ingredientId] || false,
+        additional_price: ingredientAdditionalPrices[ingredientId] || 0
+      }));
+      
+      // Add ingredients data to request
+      mealData.append('ingredients', JSON.stringify(ingredientsData));
       
       const response = await axios.put(
         `${API_URL}/meals/meals/${mealId}/`,
@@ -503,23 +552,78 @@ const EditMeal = () => {
             {ingredients.length > 0 && (
               <div className="form-group" style={{ marginTop: '1.5rem' }}>
                 <label className="form-label">Ingredients</label>
+                <p className="text-muted">Select ingredients and specify quantities for this meal</p>
                 <div className="ingredients-list" style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                  gap: '0.5rem'
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: '1rem'
                 }}>
                   {ingredients.map(ingredient => (
-                    <div key={ingredient.id} className="form-check">
-                      <input
-                        type="checkbox"
-                        id={`ingredient-${ingredient.id}`}
-                        checked={selectedIngredients.includes(ingredient.id)}
-                        onChange={() => handleIngredientToggle(ingredient.id)}
-                        className="form-check-input"
-                      />
-                      <label htmlFor={`ingredient-${ingredient.id}`} className="form-check-label">
-                        {ingredient.name}
-                      </label>
+                    <div key={ingredient.id} className="ingredient-item" style={{
+                      border: '1px solid #ddd',
+                      borderRadius: '5px',
+                      padding: '10px',
+                      backgroundColor: selectedIngredients.includes(ingredient.id) ? '#f8f9fa' : 'transparent'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                        <input
+                          type="checkbox"
+                          id={`ingredient-${ingredient.id}`}
+                          checked={selectedIngredients.includes(ingredient.id)}
+                          onChange={() => handleIngredientToggle(ingredient.id)}
+                          className="form-check-input"
+                          style={{ marginRight: '8px' }}
+                        />
+                        <label htmlFor={`ingredient-${ingredient.id}`} className="form-check-label fw-bold">
+                          {ingredient.name}
+                        </label>
+                      </div>
+                      
+                      {selectedIngredients.includes(ingredient.id) && (
+                        <div style={{ paddingLeft: '24px' }}>
+                          <div className="mb-2">
+                            <label htmlFor={`quantity-${ingredient.id}`} className="form-label small">Quantity:</label>
+                            <input
+                              type="number"
+                              id={`quantity-${ingredient.id}`}
+                              value={ingredientQuantities[ingredient.id] || 1}
+                              onChange={(e) => handleIngredientQuantityChange(ingredient.id, e.target.value)}
+                              className="form-control form-control-sm"
+                              min="0.1"
+                              step="0.1"
+                              style={{ width: '100px' }}
+                            />
+                            <small className="text-muted ms-2">{ingredient.unit}</small>
+                          </div>
+                          
+                          <div className="mb-2 form-check">
+                            <input
+                              type="checkbox"
+                              id={`optional-${ingredient.id}`}
+                              checked={ingredientOptional[ingredient.id] || false}
+                              onChange={(e) => handleIngredientOptionalChange(ingredient.id, e.target.checked)}
+                              className="form-check-input"
+                            />
+                            <label htmlFor={`optional-${ingredient.id}`} className="form-check-label small">
+                              Optional ingredient
+                            </label>
+                          </div>
+                          
+                          <div>
+                            <label htmlFor={`price-${ingredient.id}`} className="form-label small">Additional price:</label>
+                            <input
+                              type="number"
+                              id={`price-${ingredient.id}`}
+                              value={ingredientAdditionalPrices[ingredient.id] || 0}
+                              onChange={(e) => handleIngredientAdditionalPriceChange(ingredient.id, e.target.value)}
+                              className="form-control form-control-sm"
+                              min="0"
+                              step="0.01"
+                              style={{ width: '100px' }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
