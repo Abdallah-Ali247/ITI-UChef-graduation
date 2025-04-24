@@ -55,7 +55,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Process the order items
         items_data = self.request.data.get('items', [])
         
-        from meals.models import Meal, CustomMeal
+        from meals.models import Meal, CustomMeal, CustomMealIngredient
+        from restaurants.models import Ingredient
         
         for item_data in items_data:
             # Create a copy of the item data to avoid modifying the original
@@ -76,6 +77,45 @@ class OrderViewSet(viewsets.ModelViewSet):
                     custom_meal_id = item_to_create.pop('custom_meal')
                     custom_meal = CustomMeal.objects.get(id=custom_meal_id)
                     item_to_create['custom_meal'] = custom_meal
+                    
+                    # Get the custom meal ingredients and subtract quantities from inventory
+                    custom_meal_ingredients = CustomMealIngredient.objects.filter(custom_meal=custom_meal)
+                    order_quantity = item_to_create.get('quantity', 1)
+                    
+                    for cmi in custom_meal_ingredients:
+                        try:
+                            # Get the ingredient
+                            ingredient = cmi.ingredient
+                            
+                            # Calculate how much to subtract (ingredient quantity per meal × order quantity)
+                            subtract_amount = cmi.quantity * order_quantity
+                            
+                            # Update the ingredient quantity
+                            if ingredient.quantity >= subtract_amount:
+                                ingredient.quantity -= subtract_amount
+                                
+                                # If quantity becomes zero or very close to zero, mark as unavailable
+                                if ingredient.quantity < 0.001:
+                                    ingredient.quantity = 0
+                                    ingredient.is_available = False
+                                
+                                ingredient.save()
+                            else:
+                                # Not enough quantity available
+                                # We'll still create the order but log this issue
+                                import logging
+                                logger = logging.getLogger(__name__)
+                                logger.warning(
+                                    f"Not enough quantity of ingredient {ingredient.name} (ID: {ingredient.id}) "
+                                    f"for custom meal {custom_meal.name} (ID: {custom_meal.id}). "
+                                    f"Required: {subtract_amount}, Available: {ingredient.quantity}"
+                                )
+                        except Exception as e:
+                            # Log any errors but continue processing the order
+                            import logging
+                            logger = logging.getLogger(__name__)
+                            logger.error(f"Error updating ingredient quantity: {str(e)}")
+                            
                 except CustomMeal.DoesNotExist:
                     continue  # Skip this item if custom meal doesn't exist
             
