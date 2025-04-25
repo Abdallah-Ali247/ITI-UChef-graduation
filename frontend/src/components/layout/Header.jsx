@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
+import { clearCart } from '../../store/slices/cartSlice';
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -9,6 +10,9 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Clear the cart when logging out
+    dispatch(clearCart());
+    // Then logout the user
     dispatch(logout());
     navigate('/login');
   };

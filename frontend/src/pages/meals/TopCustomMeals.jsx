@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '../../store/slices/cartSlice';
 import { toast } from 'react-toastify';
 
 const TopCustomMeals = () => {
@@ -9,6 +10,7 @@ const TopCustomMeals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchTopMeals = async () => {
@@ -18,6 +20,9 @@ const TopCustomMeals = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/custom-meals/top-rated/`
         );
+        
+        // Log the response to see the structure
+        console.log('Top meals response:', response.data);
         
         // Make sure we're dealing with an array
         if (Array.isArray(response.data)) {
@@ -54,12 +59,16 @@ const TopCustomMeals = () => {
     }
 
     try {
+      // Log the meal object to debug
+      console.log('Adding meal to cart:', meal);
+      
       // First, get the ingredients for the custom meal
       const ingredientsResponse = await axios.get(
         `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/custom-meals/${meal.id}/ingredients/`
       );
       
       const ingredients = ingredientsResponse.data;
+      console.log('Ingredients response:', ingredients);
       
       // Calculate total price based on ingredients
       const totalPrice = ingredients.reduce((sum, item) => {
@@ -67,24 +76,87 @@ const TopCustomMeals = () => {
         return sum + ingredientPrice;
       }, 0);
 
-      // Add to cart with the calculated price
-      await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/orders/cart-items/`,
-        {
-          custom_meal: meal.id,
-          quantity: 1,
-          price: totalPrice,
-          ingredients: ingredients.map(i => ({
-            ingredient: i.ingredient,
-            quantity: i.quantity
-          }))
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+      // Get restaurant information from the meal
+      // Check all possible fields where restaurant ID might be stored
+      let restaurantId = meal.restaurant || meal.restaurant_id;
+      let restaurantName = "";
+      
+      // Log restaurant ID for debugging
+      console.log('Initial restaurant ID:', restaurantId);
+      
+      // If restaurant ID is missing, try to get it from the custom meal details
+      if (!restaurantId) {
+        try {
+          // Fetch the full custom meal details to get the restaurant ID
+          console.log('Fetching meal details for ID:', meal.id);
+          const mealDetailsResponse = await axios.get(
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/custom-meals/${meal.id}/`
+          );
+          
+          console.log('Meal details response:', mealDetailsResponse.data);
+          
+          // Check all possible fields where restaurant ID might be stored
+          if (mealDetailsResponse.data) {
+            restaurantId = mealDetailsResponse.data.restaurant || 
+                          mealDetailsResponse.data.restaurant_id || 
+                          (mealDetailsResponse.data.restaurant_details && mealDetailsResponse.data.restaurant_details.id);
+            
+            // Also try to get restaurant name if available
+            if (mealDetailsResponse.data.restaurant_name) {
+              restaurantName = mealDetailsResponse.data.restaurant_name;
+            } else if (mealDetailsResponse.data.restaurant_details && mealDetailsResponse.data.restaurant_details.name) {
+              restaurantName = mealDetailsResponse.data.restaurant_details.name;
+            }
           }
+        } catch (detailsError) {
+          console.error('Error fetching custom meal details:', detailsError);
+          toast.error('Could not get restaurant information for this meal');
+          return;
         }
-      );
+      } else {
+        // Try to get restaurant name if available
+        if (meal.restaurant_name) {
+          restaurantName = meal.restaurant_name;
+        } else if (meal.restaurant_details && meal.restaurant_details.name) {
+          restaurantName = meal.restaurant_details.name;
+        }
+      }
+      
+      console.log('Final restaurant ID:', restaurantId);
+      console.log('Restaurant name:', restaurantName);
+      
+      // For testing purposes, use a default restaurant ID if none is found
+      if (!restaurantId) {
+        // Get the first restaurant ID from the ingredients if possible
+        if (ingredients.length > 0 && ingredients[0].ingredient_details && 
+            ingredients[0].ingredient_details.restaurant) {
+          restaurantId = ingredients[0].ingredient_details.restaurant;
+          console.log('Using restaurant ID from ingredients:', restaurantId);
+        } else {
+          // As a last resort, use the first restaurant ID from the meal's user's restaurants
+          // This is just a fallback for testing
+          restaurantId = 1; // Default to ID 1 for testing
+          restaurantName = "Default Restaurant";
+          console.log('Using default restaurant ID:', restaurantId);
+        }
+      }
+      
+      // Add to Redux cart instead of making an API call
+      dispatch(addToCart({
+        item: {
+          id: meal.id,
+          customMealId: meal.id,
+          name: meal.name,
+          price: totalPrice,
+          image: meal.image || 'https://via.placeholder.com/300x200?text=Custom+Meal',
+          type: 'custom',
+          ingredients: ingredients,
+          restaurant: restaurantId, // Add restaurant ID to the item itself as well
+          specialInstructions: meal.cooking_instructions || ''
+        },
+        restaurantId: restaurantId,
+        restaurantName: restaurantName || "Restaurant"
+      }));
 
       toast.success(`${meal.name} added to cart!`);
     } catch (err) {

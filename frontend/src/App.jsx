@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getCurrentUser } from './store/slices/authSlice'
+import { setUserId } from './store/slices/cartSlice'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -52,10 +53,21 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const dispatch = useDispatch()
+  const { user, isAuthenticated } = useSelector(state => state.auth)
   
+  // Fetch current user on app initialization
   useEffect(() => {
     dispatch(getCurrentUser())
   }, [dispatch])
+  
+  // Set user ID in cart when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      dispatch(setUserId(user.id))
+    } else {
+      dispatch(setUserId(null))
+    }
+  }, [dispatch, isAuthenticated, user])
 
   return (
     <Router>

@@ -26,6 +26,39 @@ class MealViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description', 'category__name']
     ordering_fields = ['name', 'base_price', 'created_at']
     
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def check_availability(self, request, pk=None):
+        """Check if all ingredients for a meal are available"""
+        meal = self.get_object()
+        meal_ingredients = MealIngredient.objects.filter(meal=meal)
+        
+        # Get quantity from query params, default to 1
+        quantity = int(request.query_params.get('quantity', 1))
+        
+        unavailable_ingredients = []
+        for mi in meal_ingredients:
+            # Skip optional ingredients
+            if mi.is_optional:
+                continue
+                
+            ingredient = mi.ingredient
+            required_quantity = float(mi.quantity) * quantity
+            
+            # Check if ingredient is available and has enough quantity
+            if not ingredient.is_available or ingredient.quantity < required_quantity:
+                unavailable_ingredients.append({
+                    'id': ingredient.id,
+                    'name': ingredient.name,
+                    'available': ingredient.is_available,
+                    'required': required_quantity,
+                    'in_stock': ingredient.quantity
+                })
+        
+        return Response({
+            'is_available': len(unavailable_ingredients) == 0,
+            'unavailable_ingredients': unavailable_ingredients
+        })
+    
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
@@ -92,7 +125,7 @@ class CustomMealViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'created_at']
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'ingredients', 'top_rated']:
+        if self.action in ['list', 'retrieve', 'ingredients', 'top_rated', 'check_availability']:
             return [AllowAny()]
         return [IsAuthenticated()]
     
@@ -147,6 +180,35 @@ class CustomMealViewSet(viewsets.ModelViewSet):
         ingredients = CustomMealIngredient.objects.filter(custom_meal=custom_meal)
         serializer = CustomMealIngredientSerializer(ingredients, many=True)
         return Response(serializer.data)
+        
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    def check_availability(self, request, pk=None):
+        """Check if all ingredients for a custom meal are available"""
+        custom_meal = self.get_object()
+        custom_meal_ingredients = CustomMealIngredient.objects.filter(custom_meal=custom_meal)
+        
+        # Get quantity from query params, default to 1
+        quantity = int(request.query_params.get('quantity', 1))
+        
+        unavailable_ingredients = []
+        for cmi in custom_meal_ingredients:
+            ingredient = cmi.ingredient
+            required_quantity = float(cmi.quantity) * quantity
+            
+            # Check if ingredient is available and has enough quantity
+            if not ingredient.is_available or ingredient.quantity < required_quantity:
+                unavailable_ingredients.append({
+                    'id': ingredient.id,
+                    'name': ingredient.name,
+                    'available': ingredient.is_available,
+                    'required': required_quantity,
+                    'in_stock': ingredient.quantity
+                })
+        
+        return Response({
+            'is_available': len(unavailable_ingredients) == 0,
+            'unavailable_ingredients': unavailable_ingredients
+        })
         
     @action(detail=False, methods=['get'], permission_classes=[AllowAny], url_path='top-rated', url_name='top-rated')
     def top_rated(self, request):

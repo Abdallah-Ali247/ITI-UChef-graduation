@@ -1,16 +1,49 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// Helper function to get user-specific cart from localStorage
+const getUserCart = (userId) => {
+  if (!userId) return null;
+  
+  const savedCart = localStorage.getItem(`cart_${userId}`);
+  return savedCart ? JSON.parse(savedCart) : null;
+};
+
+// Helper function to save user-specific cart to localStorage
+const saveUserCart = (userId, cart) => {
+  if (!userId) return;
+  
+  localStorage.setItem(`cart_${userId}`, JSON.stringify(cart));
+};
+
 const initialState = {
   items: [],
   restaurantId: null,
   restaurantName: '',
   total: 0,
+  userId: null,
 };
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    // Set the user ID for the cart
+    setUserId: (state, action) => {
+      const userId = action.payload;
+      state.userId = userId;
+      
+      // If we have a userId, load the user's cart from localStorage
+      if (userId) {
+        const userCart = getUserCart(userId);
+        if (userCart) {
+          state.items = userCart.items || [];
+          state.restaurantId = userCart.restaurantId || null;
+          state.restaurantName = userCart.restaurantName || '';
+          state.total = userCart.total || 0;
+        }
+      }
+    },
+    
     addToCart: (state, action) => {
       const { item, restaurantId, restaurantName } = action.payload;
       
@@ -52,6 +85,16 @@ const cartSlice = createSlice({
         (sum, item) => sum + (item.price * item.quantity), 
         0
       );
+      
+      // Save to localStorage if we have a userId
+      if (state.userId) {
+        saveUserCart(state.userId, {
+          items: state.items,
+          restaurantId: state.restaurantId,
+          restaurantName: state.restaurantName,
+          total: state.total
+        });
+      }
     },
     
     removeFromCart: (state, action) => {
@@ -73,6 +116,16 @@ const cartSlice = createSlice({
         (sum, item) => sum + (item.price * item.quantity), 
         0
       );
+      
+      // Save to localStorage if we have a userId
+      if (state.userId) {
+        saveUserCart(state.userId, {
+          items: state.items,
+          restaurantId: state.restaurantId,
+          restaurantName: state.restaurantName,
+          total: state.total
+        });
+      }
     },
     
     updateQuantity: (state, action) => {
@@ -103,6 +156,16 @@ const cartSlice = createSlice({
         (sum, item) => sum + (item.price * item.quantity), 
         0
       );
+      
+      // Save to localStorage if we have a userId
+      if (state.userId) {
+        saveUserCart(state.userId, {
+          items: state.items,
+          restaurantId: state.restaurantId,
+          restaurantName: state.restaurantName,
+          total: state.total
+        });
+      }
     },
     
     clearCart: (state) => {
@@ -110,9 +173,14 @@ const cartSlice = createSlice({
       state.restaurantId = null;
       state.restaurantName = '';
       state.total = 0;
+      
+      // Clear from localStorage if we have a userId
+      if (state.userId) {
+        localStorage.removeItem(`cart_${state.userId}`);
+      }
     },
   },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { setUserId, addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

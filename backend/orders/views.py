@@ -49,14 +49,84 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Order.objects.filter(user=user)
     
     def perform_create(self, serializer):
-        # Save the order with the current user
-        order = serializer.save(user=self.request.user)
-        
-        # Process the order items
+        # Process the order items to check availability before creating the order
         items_data = self.request.data.get('items', [])
         
         from meals.models import Meal, CustomMeal, CustomMealIngredient, MealIngredient
         from restaurants.models import Ingredient
+        
+        # First, check if all ingredients are available
+        unavailable_ingredients = []
+        
+        for item_data in items_data:
+            # Check regular meals
+            if 'meal' in item_data and item_data['meal']:
+                try:
+                    meal_id = item_data['meal']
+                    meal = Meal.objects.get(id=meal_id)
+                    
+                    # Get the meal ingredients and check availability
+                    meal_ingredients = MealIngredient.objects.filter(meal=meal)
+                    order_quantity = int(item_data.get('quantity', 1))
+                    
+                    for mi in meal_ingredients:
+                        # Skip optional ingredients
+                        if mi.is_optional:
+                            continue
+                            
+                        ingredient = mi.ingredient
+                        required_quantity = float(mi.quantity) * order_quantity
+                        
+                        # Check if ingredient is available and has enough quantity
+                        if not ingredient.is_available or ingredient.quantity < required_quantity:
+                            unavailable_ingredients.append({
+                                'name': ingredient.name,
+                                'meal': meal.name,
+                                'available': ingredient.is_available,
+                                'required': required_quantity,
+                                'in_stock': ingredient.quantity
+                            })
+                except Meal.DoesNotExist:
+                    pass
+            
+            # Check custom meals
+            if 'custom_meal' in item_data and item_data['custom_meal']:
+                try:
+                    custom_meal_id = item_data['custom_meal']
+                    custom_meal = CustomMeal.objects.get(id=custom_meal_id)
+                    
+                    # Get the custom meal ingredients and check availability
+                    custom_meal_ingredients = CustomMealIngredient.objects.filter(custom_meal=custom_meal)
+                    order_quantity = int(item_data.get('quantity', 1))
+                    
+                    for cmi in custom_meal_ingredients:
+                        ingredient = cmi.ingredient
+                        required_quantity = float(cmi.quantity) * order_quantity
+                        
+                        # Check if ingredient is available and has enough quantity
+                        if not ingredient.is_available or ingredient.quantity < required_quantity:
+                            unavailable_ingredients.append({
+                                'name': ingredient.name,
+                                'meal': custom_meal.name,
+                                'available': ingredient.is_available,
+                                'required': required_quantity,
+                                'in_stock': ingredient.quantity
+                            })
+                except CustomMeal.DoesNotExist:
+                    pass
+        
+        # If any ingredients are unavailable, return an error
+        if unavailable_ingredients:
+            error_message = "Cannot place order due to unavailable ingredients:\n"
+            for item in unavailable_ingredients:
+                error_message += f"- {item['name']} (required for {item['meal']}) is {'out of stock' if not item['available'] else 'low in stock'}. "
+                error_message += f"Required: {item['required']}, Available: {item['in_stock']}\n"
+            
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'unavailable_ingredients': unavailable_ingredients, 'message': error_message})
+        
+        # If all ingredients are available, save the order with the current user
+        order = serializer.save(user=self.request.user)
         
         for item_data in items_data:
             # Create a copy of the item data to avoid modifying the original
