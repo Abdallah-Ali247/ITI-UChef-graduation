@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchMealById } from '../../store/slices/mealSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import ReviewList from '../../components/reviews/ReviewList';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const MealDetail = () => {
   const { id } = useParams();
@@ -12,6 +14,8 @@ const MealDetail = () => {
   const { currentMeal, loading, error } = useSelector(state => state.meals);
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState('');
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(null);
   
   useEffect(() => {
     dispatch(fetchMealById(id));
@@ -24,8 +28,51 @@ const MealDetail = () => {
     }
   };
   
-  const handleAddToCart = () => {
+  const checkIngredientAvailability = async () => {
+    if (!currentMeal) return false;
+    
+    try {
+      setCheckingAvailability(true);
+      setAvailabilityError(null);
+      
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/meals/${currentMeal.id}/check_availability/`,
+        { params: { quantity } }
+      );
+      
+      if (!response.data.is_available) {
+        const unavailableIngredients = response.data.unavailable_ingredients;
+        let errorMessage = 'Cannot add to cart due to unavailable ingredients:\n';
+        
+        unavailableIngredients.forEach(item => {
+          errorMessage += `- ${item.name} is ${!item.available ? 'out of stock' : 'low in stock'}. `;
+          errorMessage += `Required: ${item.required}, Available: ${item.in_stock}\n`;
+        });
+        
+        setAvailabilityError(errorMessage);
+        toast.error('Some ingredients are out of stock');
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error checking ingredient availability:', error);
+      setAvailabilityError('Failed to check ingredient availability');
+      toast.error('Failed to check ingredient availability');
+      return false;
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
+  
+  const handleAddToCart = async () => {
     if (!currentMeal) return;
+    
+    // First check ingredient availability
+    const ingredientsAvailable = await checkIngredientAvailability();
+    if (!ingredientsAvailable) {
+      return;
+    }
     
     dispatch(addToCart({
       item: {
@@ -42,7 +89,7 @@ const MealDetail = () => {
     }));
     
     // Show success message and navigate to cart
-    alert(`${currentMeal.name} added to cart!`);
+    toast.success(`${currentMeal.name} added to cart!`);
     navigate('/cart');
   };
   
@@ -153,12 +200,19 @@ const MealDetail = () => {
                 ></textarea>
               </div>
               
+              {availabilityError && (
+                <div className="alert alert-danger" style={{ marginTop: '1rem', whiteSpace: 'pre-line' }}>
+                  {availabilityError}
+                </div>
+              )}
+              
               <button 
                 className="btn btn-primary" 
                 onClick={handleAddToCart}
                 style={{ marginTop: '1rem', width: '100%' }}
+                disabled={checkingAvailability}
               >
-                Add to Cart - ${(currentMeal.base_price * quantity).toFixed(2)}
+                {checkingAvailability ? 'Checking Availability...' : `Add to Cart - $${(currentMeal.base_price * quantity).toFixed(2)}`}
               </button>
             </div>
           )}

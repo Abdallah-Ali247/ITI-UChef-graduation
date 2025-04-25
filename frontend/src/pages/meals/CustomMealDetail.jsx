@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { addToCart } from '../../store/slices/cartSlice';
 import ReviewList from '../../components/reviews/ReviewList';
+import { toast } from 'react-toastify';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -20,6 +21,8 @@ const CustomMealDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isPublic, setIsPublic] = useState(false);
   const [savingPublicStatus, setSavingPublicStatus] = useState(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(null);
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -98,8 +101,51 @@ const CustomMealDetail = () => {
     }
   };
   
+  const checkIngredientAvailability = async () => {
+    if (!customMeal) return false;
+    
+    try {
+      setCheckingAvailability(true);
+      setAvailabilityError(null);
+      
+      const response = await axios.get(
+        `${API_URL}/meals/custom-meals/${customMeal.id}/check_availability/`,
+        { params: { quantity } }
+      );
+      
+      if (!response.data.is_available) {
+        const unavailableIngredients = response.data.unavailable_ingredients;
+        let errorMessage = 'Cannot add to cart due to unavailable ingredients:\n';
+        
+        unavailableIngredients.forEach(item => {
+          errorMessage += `- ${item.name} is ${!item.available ? 'out of stock' : 'low in stock'}. `;
+          errorMessage += `Required: ${item.required}, Available: ${item.in_stock}\n`;
+        });
+        
+        setAvailabilityError(errorMessage);
+        toast.error('Some ingredients are out of stock');
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error checking ingredient availability:', error);
+      setAvailabilityError('Failed to check ingredient availability');
+      toast.error('Failed to check ingredient availability');
+      return false;
+    } finally {
+      setCheckingAvailability(false);
+    }
+  };
+  
   const handleAddToCart = async () => {
     if (!customMeal) return;
+    
+    // First check ingredient availability
+    const ingredientsAvailable = await checkIngredientAvailability();
+    if (!ingredientsAvailable) {
+      return;
+    }
     
     // Calculate total price based on ingredients
     const totalPrice = ingredients.reduce((sum, item) => {
@@ -146,7 +192,7 @@ const CustomMealDetail = () => {
           }
         } catch (error) {
           console.error('Error fetching restaurants:', error);
-          alert('Could not determine the restaurant for this custom meal. Please try again.');
+          toast.error('Could not determine the restaurant for this custom meal. Please try again.');
           return;
         }
       }
@@ -159,18 +205,19 @@ const CustomMealDetail = () => {
           type: 'custom',
           quantity,
           image: customMeal.image,
-          specialInstructions: customMeal.cooking_instructions || ''
+          specialInstructions: customMeal.cooking_instructions || '',
+          restaurant: restaurantId // Add restaurant ID to the item itself as well
         },
         restaurantId,
         restaurantName
       }));
       
       // Show success message and navigate to cart
-      alert(`${customMeal.name} added to cart!`);
+      toast.success(`${customMeal.name} added to cart!`);
       navigate('/cart');
     } catch (error) {
       console.error('Error adding custom meal to cart:', error);
-      alert('Failed to add meal to cart. Please try again.');
+      toast.error('Failed to add meal to cart. Please try again.');
     }
   };
   
@@ -276,26 +323,32 @@ const CustomMealDetail = () => {
             </div>
           )}
           
-          <div className="order-options">
-            <div className="form-group">
-              <label htmlFor="quantity" className="form-label">Quantity</label>
+          <div className="order-actions" style={{ marginTop: '2rem' }}>
+            <div className="quantity-selector" style={{ marginBottom: '1rem' }}>
+              <label htmlFor="quantity" style={{ display: 'block', marginBottom: '0.5rem' }}>Quantity:</label>
               <input
                 type="number"
                 id="quantity"
                 min="1"
                 value={quantity}
                 onChange={handleQuantityChange}
-                className="form-control"
-                style={{ width: '100px' }}
+                style={{ width: '80px', padding: '0.5rem' }}
               />
             </div>
+            
+            {availabilityError && (
+              <div className="alert alert-danger" style={{ marginBottom: '1rem', whiteSpace: 'pre-line' }}>
+                {availabilityError}
+              </div>
+            )}
             
             <button 
               className="btn btn-primary" 
               onClick={handleAddToCart}
-              style={{ marginTop: '1rem', width: '100%' }}
+              style={{ width: '100%', marginBottom: '1rem' }}
+              disabled={checkingAvailability}
             >
-              Add to Cart - ${(totalPrice * quantity).toFixed(2)}
+              {checkingAvailability ? 'Checking Availability...' : `Add to Cart - $${(totalPrice * quantity).toFixed(2)}`}
             </button>
           </div>
         </div>
