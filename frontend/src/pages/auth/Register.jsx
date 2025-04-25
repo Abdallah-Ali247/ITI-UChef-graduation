@@ -88,6 +88,7 @@ const Register = () => {
     // Only proceed if the form is valid
     if (isFormValid(formErrors)) {
       dispatch(register(formData));
+      navigate('/login');
     } else {
       // Scroll to the first error
       const firstErrorField = document.querySelector('.is-invalid');
