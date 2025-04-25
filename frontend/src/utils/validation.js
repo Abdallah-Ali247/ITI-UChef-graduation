@@ -16,7 +16,7 @@ export const isValidPassword = (password) => {
 
 // Phone number validation
 export const isValidPhoneNumber = (phoneNumber) => {
-  const phoneRegex = /^\+?[0-9]{10,15}$/;
+  const phoneRegex =  /^(?:\+20|0020|0)?1[0125][0-9]{8}$/;
   return phoneRegex.test(phoneNumber);
 };
 

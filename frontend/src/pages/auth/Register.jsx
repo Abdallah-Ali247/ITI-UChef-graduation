@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { register, clearError } from '../../store/slices/authSlice';
+import { validateForm, validationRules, isFormValid } from '../../utils/validation';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,8 @@ const Register = () => {
     phone_number: '',
     address: ''
   });
+  
+  const [errors, setErrors] = useState({});
   
   const { 
     username, email, password, password2, first_name, 
@@ -36,19 +39,62 @@ const Register = () => {
   }, [dispatch, isAuthenticated, navigate]);
   
   const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Validate field on change
+    const fieldRules = validationRules.register[name];
+    if (fieldRules) {
+      // For password confirmation, we need to set the match value dynamically
+      if (name === 'password2') {
+        fieldRules.match = {
+          name: 'password',
+          value: formData.password
+        };
+      }
+      
+      // Validate the field
+      const fieldError = validateForm(
+        { [name]: value },
+        { [name]: fieldRules }
+      );
+      
+      // Update errors state
+      setErrors(prev => ({
+        ...prev,
+        [name]: fieldError[name] || null
+      }));
+    }
   };
   
   const handleSubmit = e => {
     e.preventDefault();
     
-    if (password !== password2) {
-      // Handle password mismatch error
-      alert('Passwords do not match');
-      return;
+    // Create a custom validation rules object based on the register rules
+    const customValidationRules = { ...validationRules.register };
+    
+    // Set the match value for password confirmation dynamically
+    if (customValidationRules.password2) {
+      customValidationRules.password2.match = {
+        name: 'password',
+        value: formData.password
+      };
     }
     
-    dispatch(register(formData));
+    // Validate the entire form
+    const formErrors = validateForm(formData, customValidationRules);
+    setErrors(formErrors);
+    
+    // Only proceed if the form is valid
+    if (isFormValid(formErrors)) {
+      dispatch(register(formData));
+    } else {
+      // Scroll to the first error
+      const firstErrorField = document.querySelector('.is-invalid');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   };
   
   return (
@@ -71,9 +117,14 @@ const Register = () => {
               name="first_name"
               value={first_name}
               onChange={handleChange}
-              className="form-control"
+              className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
               required
             />
+            {errors.first_name && (
+              <div className="invalid-feedback">
+                {errors.first_name}
+              </div>
+            )}
           </div>
           
           <div className="form-group">
@@ -84,9 +135,14 @@ const Register = () => {
               name="last_name"
               value={last_name}
               onChange={handleChange}
-              className="form-control"
+              className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
               required
             />
+            {errors.last_name && (
+              <div className="invalid-feedback">
+                {errors.last_name}
+              </div>
+            )}
           </div>
         </div>
         
@@ -98,9 +154,14 @@ const Register = () => {
             name="username"
             value={username}
             onChange={handleChange}
-            className="form-control"
+            className={`form-control ${errors.username ? 'is-invalid' : ''}`}
             required
           />
+          {errors.username && (
+            <div className="invalid-feedback">
+              {errors.username}
+            </div>
+          )}
         </div>
         
         <div className="form-group">
@@ -111,9 +172,14 @@ const Register = () => {
             name="email"
             value={email}
             onChange={handleChange}
-            className="form-control"
+            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
             required
           />
+          {errors.email && (
+            <div className="invalid-feedback">
+              {errors.email}
+            </div>
+          )}
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -125,9 +191,14 @@ const Register = () => {
               name="password"
               value={password}
               onChange={handleChange}
-              className="form-control"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
               required
             />
+            {errors.password && (
+              <div className="invalid-feedback">
+                {errors.password}
+              </div>
+            )}
           </div>
           
           <div className="form-group">
@@ -138,9 +209,14 @@ const Register = () => {
               name="password2"
               value={password2}
               onChange={handleChange}
-              className="form-control"
+              className={`form-control ${errors.password2 ? 'is-invalid' : ''}`}
               required
             />
+            {errors.password2 && (
+              <div className="invalid-feedback">
+                {errors.password2}
+              </div>
+            )}
           </div>
         </div>
         
@@ -167,9 +243,14 @@ const Register = () => {
             name="phone_number"
             value={phone_number}
             onChange={handleChange}
-            className="form-control"
+            className={`form-control ${errors.phone_number ? 'is-invalid' : ''}`}
             placeholder="+1234567890"
           />
+          {errors.phone_number && (
+            <div className="invalid-feedback">
+              {errors.phone_number}
+            </div>
+          )}
         </div>
         
         <div className="form-group">

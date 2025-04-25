@@ -5,6 +5,7 @@ import axios from 'axios';
 import { fetchUserOrders } from '../../store/slices/orderSlice';
 import { fetchCustomMeals } from '../../store/slices/mealSlice';
 import { addToCart } from '../../store/slices/cartSlice';
+import { validateField, validateForm, isFormValid } from '../../utils/validation';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -29,6 +30,7 @@ const Profile = () => {
   });
   const [profileUpdateLoading, setProfileUpdateLoading] = useState(false);
   const [profileUpdateError, setProfileUpdateError] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   
   const handleAddToCart = async (meal) => {
     // Show loading indicator
@@ -173,10 +175,65 @@ const Profile = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Validate the field as it changes
+    let error = null;
+    
+    switch (name) {
+      case 'email':
+        error = validateField('Email', value, { required: true, email: true });
+        break;
+      case 'phone_number':
+        error = validateField('Phone Number', value, { phone: true });
+        break;
+      case 'first_name':
+      case 'last_name':
+        error = validateField(name === 'first_name' ? 'First Name' : 'Last Name', value, { 
+          required: true, 
+          minLength: 2 
+        });
+        break;
+      case 'bio':
+        error = validateField('Bio', value, { maxLength: 500 });
+        break;
+      default:
+        // No validation for other fields
+        break;
+    }
+    
+    // Update the errors state
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
   };
   
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+    
+    // Create validation rules for the profile form
+    const profileValidationRules = {
+      email: { required: true, email: true },
+      first_name: { required: true, minLength: 2 },
+      last_name: { required: true, minLength: 2 },
+      phone_number: { phone: true },
+      bio: { maxLength: 500 }
+    };
+    
+    // Validate all fields
+    const errors = validateForm(profileForm, profileValidationRules);
+    setFormErrors(errors);
+    
+    // Only proceed if there are no validation errors
+    if (!isFormValid(errors)) {
+      // Scroll to the first error field
+      const firstErrorField = document.querySelector('.is-invalid');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    
     setProfileUpdateLoading(true);
     setProfileUpdateError(null);
     
@@ -437,9 +494,14 @@ const Profile = () => {
                             name="first_name"
                             value={profileForm.first_name}
                             onChange={handleProfileFormChange}
-                            className="form-control"
+                            className={`form-control ${formErrors.first_name ? 'is-invalid' : ''}`}
                             required
                           />
+                          {formErrors.first_name && (
+                            <div className="invalid-feedback">
+                              {formErrors.first_name}
+                            </div>
+                          )}
                         </div>
                         
                         <div className="form-group">
@@ -450,7 +512,7 @@ const Profile = () => {
                             name="last_name"
                             value={profileForm.last_name}
                             onChange={handleProfileFormChange}
-                            className="form-control"
+                            className={`form-control ${formErrors.last_name ? 'is-invalid' : ''}`}
                             required
                           />
                         </div>
@@ -463,9 +525,14 @@ const Profile = () => {
                             name="email"
                             value={profileForm.email}
                             onChange={handleProfileFormChange}
-                            className="form-control"
+                            className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
                             required
                           />
+                          {formErrors.email && (
+                            <div className="invalid-feedback">
+                              {formErrors.email}
+                            </div>
+                          )}
                         </div>
                         
                         <div className="form-group">
@@ -476,7 +543,7 @@ const Profile = () => {
                             name="phone_number"
                             value={profileForm.phone_number}
                             onChange={handleProfileFormChange}
-                            className="form-control"
+                            className={`form-control ${formErrors.phone_number ? 'is-invalid' : ''}`}
                             placeholder="+1234567890"
                           />
                         </div>

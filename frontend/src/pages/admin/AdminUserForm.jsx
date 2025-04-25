@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import { validateField, validateForm, isFormValid } from '../../utils/validation';
 
 // API URL constant
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
@@ -86,6 +87,7 @@ const AdminUserForm = ({ isEdit = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
   
   // Fetch user data if in edit mode
   useEffect(() => {
@@ -145,13 +147,129 @@ const AdminUserForm = ({ isEdit = false }) => {
       ...prevData,
       [name]: value
     }));
+    
+    // Clear general error when user makes changes
+    setError(null);
+    
+    // Validate field as it changes
+    let fieldError = null;
+    
+    switch (name) {
+      case 'username':
+        fieldError = validateField('Username', value, { 
+          required: true, 
+          minLength: 3,
+          maxLength: 30
+        });
+        break;
+        
+      case 'email':
+        fieldError = validateField('Email', value, { 
+          required: true, 
+          email: true 
+        });
+        break;
+        
+      case 'password':
+        fieldError = isEdit && !value ? null : validateField('Password', value, { 
+          required: !isEdit,
+          password: true
+        });
+        
+        // If password changes, also validate confirm_password
+        if (prevData.confirm_password) {
+          const confirmError = validateField('Confirm Password', prevData.confirm_password, {
+            required: !isEdit,
+            match: {
+              name: 'password',
+              value: value
+            }
+          });
+          
+          setFormErrors(prev => ({
+            ...prev,
+            confirm_password: confirmError
+          }));
+        }
+        break;
+        
+      case 'confirm_password':
+        fieldError = isEdit && !value ? null : validateField('Confirm Password', value, {
+          required: !isEdit,
+          match: {
+            name: 'password',
+            value: prevData.password
+          }
+        });
+        break;
+        
+      case 'first_name':
+      case 'last_name':
+        fieldError = validateField(name === 'first_name' ? 'First Name' : 'Last Name', value, {
+          minLength: 2
+        });
+        break;
+        
+      default:
+        break;
+    }
+    
+    // Update form errors
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: fieldError
+    }));
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form
-    if (formData.password !== formData.confirm_password) {
+    // Create validation rules based on whether we're editing or creating
+    const validationRules = {
+      username: { required: true, minLength: 3, maxLength: 30 },
+      email: { required: true, email: true },
+      first_name: { minLength: 2 },
+      last_name: { minLength: 2 }
+    };
+    
+    // Add password validation rules (different for edit vs. create)
+    if (!isEdit) {
+      // For new users, password is required
+      validationRules.password = { required: true, password: true };
+      validationRules.confirm_password = { 
+        required: true,
+        match: {
+          name: 'password',
+          value: formData.password
+        }
+      };
+    } else if (formData.password) {
+      // For existing users, only validate password if provided
+      validationRules.password = { password: true };
+      validationRules.confirm_password = { 
+        match: {
+          name: 'password',
+          value: formData.password
+        }
+      };
+    }
+    
+    // Validate the entire form
+    const errors = validateForm(formData, validationRules);
+    setFormErrors(errors);
+    
+    // Check if the form is valid
+    if (!isFormValid(errors)) {
+      // Scroll to the first error field
+      const firstErrorField = document.querySelector('.is-invalid');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    
+    // Additional validation checks
+    if (formData.password !== formData.confirm_password && (formData.password || formData.confirm_password)) {
       setError('Passwords do not match');
       return;
     }
@@ -290,9 +408,14 @@ const AdminUserForm = ({ isEdit = false }) => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              style={styles.input}
+              style={{...styles.input, borderColor: formErrors.username ? '#dc3545' : '#ddd'}}
               required
             />
+            {formErrors.username && (
+              <div style={styles.error}>
+                {formErrors.username}
+              </div>
+            )}
           </div>
           
           <div style={styles.formGroup}>
@@ -303,9 +426,14 @@ const AdminUserForm = ({ isEdit = false }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              style={styles.input}
+              style={{...styles.input, borderColor: formErrors.email ? '#dc3545' : '#ddd'}}
               required
             />
+            {formErrors.email && (
+              <div style={styles.error}>
+                {formErrors.email}
+              </div>
+            )}
           </div>
           
           <div style={styles.formGroup}>
