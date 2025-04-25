@@ -116,9 +116,10 @@ const MealDetail = () => {
               <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem' }}>
                 {currentMeal.meal_ingredients.map(item => (
                   <li key={item.id}>
-                    {item.ingredient_details.name} 
-                    {item.is_optional && <span style={{ color: '#666' }}> (Optional)</span>}
-                    {item.additional_price > 0 && <span> (+${item.additional_price})</span>}
+                    {item.ingredient_details.name} ({item.quantity} {item.ingredient_details.unit})
+                  
+                    {/* {item.ingredient_details.quantity}  */}
+                  
                   </li>
                 ))}
               </ul>
