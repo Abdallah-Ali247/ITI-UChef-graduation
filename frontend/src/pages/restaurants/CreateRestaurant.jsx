@@ -427,20 +427,23 @@ const CreateRestaurant = ({ isEdit = false, isAdmin = false }) => {
                   required
                 >
                   <option value="">Select a restaurant owner</option>
-                  {Array.isArray(restaurantOwners) ? restaurantOwners.map(owner => {
-                    // Convert to string for consistent comparison
-                    const ownerId = owner.id.toString();
-                    const hasRestaurant = ownersWithRestaurants.includes(ownerId);
-                    return (
-                      <option 
-                        key={owner.id} 
-                        value={owner.id}
-                        disabled={hasRestaurant}
-                      >
-                        {owner.username} ({owner.email}) {hasRestaurant ? '- Already has a restaurant' : ''}
-                      </option>
-                    );
-                  }) : <option value="">No restaurant owners found</option>}
+                  {Array.isArray(restaurantOwners) ? restaurantOwners
+                    .filter(owner => owner.user_type === 'restaurant')
+                    .map(owner => {
+                      // Convert to string for consistent comparison
+                      const ownerId = owner.id.toString();
+                      const hasRestaurant = ownersWithRestaurants.includes(ownerId);
+                      return (
+                        <option 
+                          key={owner.id} 
+                          value={owner.id}
+                          disabled={hasRestaurant}
+                        >
+                          {owner.username} ({owner.email}) {hasRestaurant ? '- Already has a restaurant' : ''}
+                        </option>
+                      );
+                    }) : <option value="">No restaurant owners available</option>
+                  }
                 </select>
                 <small className="form-text text-muted">Select the user who will own this restaurant</small>
               </div>
