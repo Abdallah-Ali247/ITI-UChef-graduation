@@ -446,12 +446,14 @@ const AdminUserForm = ({ isEdit = false }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              style={{...styles.input, borderColor: !isEdit && !formData.password ? '#dc3545' : '#ddd'}}
+              style={{...styles.input, borderColor: (formErrors.password || (!isEdit && !formData.password)) ? '#dc3545' : '#ddd'}}
               required={!isEdit}
             />
-            {!isEdit && !formData.password && (
+            {formErrors.password ? (
+              <div style={styles.error}>{formErrors.password}</div>
+            ) : (!isEdit && !formData.password && (
               <div style={styles.error}>Password is required for new users</div>
-            )}
+            ))}
           </div>
           
           <div style={styles.formGroup}>
@@ -465,13 +467,15 @@ const AdminUserForm = ({ isEdit = false }) => {
               value={formData.confirm_password}
               onChange={handleChange}
               style={{...styles.input, 
-                borderColor: (formData.password !== formData.confirm_password && formData.confirm_password) ? 
+                borderColor: (formErrors.confirm_password || (formData.password !== formData.confirm_password && formData.confirm_password)) ? 
                   '#dc3545' : '#ddd'}}
               required={!isEdit}
             />
-            {formData.password !== formData.confirm_password && formData.confirm_password && (
+            {formErrors.confirm_password ? (
+              <div style={styles.error}>{formErrors.confirm_password}</div>
+            ) : (formData.password !== formData.confirm_password && formData.confirm_password && (
               <div style={styles.error}>Passwords do not match</div>
-            )}
+            ))}
           </div>
           
           <div style={styles.formGroup}>
@@ -482,8 +486,13 @@ const AdminUserForm = ({ isEdit = false }) => {
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              style={styles.input}
+              style={{...styles.input, borderColor: formErrors.first_name ? '#dc3545' : '#ddd'}}
             />
+            {formErrors.first_name && (
+              <div style={styles.error}>
+                {formErrors.first_name}
+              </div>
+            )}
           </div>
           
           <div style={styles.formGroup}>
@@ -494,8 +503,13 @@ const AdminUserForm = ({ isEdit = false }) => {
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
-              style={styles.input}
+              style={{...styles.input, borderColor: formErrors.last_name ? '#dc3545' : '#ddd'}}
             />
+            {formErrors.last_name && (
+              <div style={styles.error}>
+                {formErrors.last_name}
+              </div>
+            )}
           </div>
           
           <div style={styles.formGroup}>
