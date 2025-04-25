@@ -25,6 +25,7 @@ import EditIngredient from './pages/ingredients/EditIngredient'
 import CustomMealBuilder from './pages/meals/CustomMealBuilder'
 import CustomMealDetail from './pages/meals/CustomMealDetail'
 import TopCustomMeals from './pages/meals/TopCustomMeals'
+import AllMeals from './pages/meals/AllMeals'
 import Cart from './pages/cart/Cart'
 import Checkout from './pages/cart/Checkout'
 import OrderHistory from './pages/orders/OrderHistory'
@@ -82,6 +83,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/restaurants" element={<RestaurantList />} />
             <Route path="/restaurants/:id" element={<RestaurantDetail />} />
+            <Route path="/meals" element={<AllMeals />} />
             <Route path="/meals/:id" element={<MealDetail />} />
             <Route path="/meals/custom/:id" element={<CustomMealDetail />} />
             <Route path="/top-custom-meals" element={<TopCustomMeals />} />

@@ -593,10 +593,10 @@ const EditMeal = () => {
                               step="0.1"
                               style={{ width: '100px' }}
                             />
-                            <small className="text-muted ms-2">{ingredient.unit}</small>
+                            <small className="text-muted ms-2">Unite: {ingredient.unit}</small>
                           </div>
                           
-                          <div className="mb-2 form-check">
+                          {/* <div className="mb-2 form-check">
                             <input
                               type="checkbox"
                               id={`optional-${ingredient.id}`}
@@ -607,9 +607,9 @@ const EditMeal = () => {
                             <label htmlFor={`optional-${ingredient.id}`} className="form-check-label small">
                               Optional ingredient
                             </label>
-                          </div>
+                          </div> */}
                           
-                          <div>
+                          {/* <div>
                             <label htmlFor={`price-${ingredient.id}`} className="form-label small">Additional price:</label>
                             <input
                               type="number"
@@ -621,7 +621,7 @@ const EditMeal = () => {
                               step="0.01"
                               style={{ width: '100px' }}
                             />
-                          </div>
+                          </div> */}
                         </div>
                       )}
                     </div>
