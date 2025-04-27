@@ -42,7 +42,7 @@ class CustomMeal(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     base_meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True, blank=True, related_name='custom_versions')
-    is_public = models.BooleanField(default=False)  # If True, other users can see and order this custom meal
+    is_public = models.BooleanField(default=False) 
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
