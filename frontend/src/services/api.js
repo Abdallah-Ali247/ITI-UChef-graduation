@@ -45,5 +45,6 @@ api.interceptors.response.use(
 export default api;
 
 
+export const STRIPE_PUBLISHABLE_KEY = 'key';
 // Load Stripe.js
 export const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);

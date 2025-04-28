@@ -157,4 +157,5 @@ REST_FRAMEWORK = {
     ],
 }
 
- 
+
+STRIPE_SECRET_KEY = 'key' 
