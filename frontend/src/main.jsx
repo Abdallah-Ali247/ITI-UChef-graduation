@@ -5,6 +5,7 @@ import { store } from './store'
 // import './index.css'
 import './styles/themes.css'
 import './styles/animations.css'
+import './styles/main.css'
 import App from './App.jsx'
 import { ThemeProvider } from './context/ThemeContext'
 

@@ -199,3 +199,10 @@ body {
   display: inline-block;
   padding: 0 5px;
 }
+
+.invalid-feedback, .alert{
+  color: red !important;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+
