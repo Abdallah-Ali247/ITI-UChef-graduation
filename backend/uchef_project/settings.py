@@ -88,7 +88,7 @@ ROOT_URLCONF = 'uchef_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'users' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -178,10 +178,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-<<<<<<< HEAD
 
 STRIPE_SECRET_KEY = 'key' 
-=======
-# Token settings
 
->>>>>>> e46ab32 (email sent correct)
