@@ -1,59 +1,26 @@
-# Python
-__pycache__/
-*.py[cod]
-*.sqlite3
-
-# Virtual Environment
-venv/
-
-# Environment Variables
-.env
-
-# Django migrations
-*/migrations/
-*.log
-
-# VSCode settings (if you use VSCode)
-.vscode/
-
-# macOS files
-.DS_Store
-# Byte-compiled / optimized / DLL files
+# Python cache and compiled files
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-# Python
-__pycache__/
-*.py[cod]
-*.sqlite3
+*.pyc
 
-# Virtual Environment
+# Virtual environment
 venv/
 
-# Environment Variables
+# Environment variables
 .env
 
-# Django migrations
-*/migrations/
-*.log
-
-# VSCode settings (if you use VSCode)
-.vscode/
-
-# macOS files
-.DS_Store
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-# Ignore virtual environment
-venv/
-
-# Ignore SQLite database
+# SQLite database
+*.sqlite3
 db.sqlite3
 
-# Ignore Python cache
-__pycache__/
-*.pyc
+# Django migrations
+*/migrations/
+*.log
+
+# VSCode settings
+.vscode/
+
+# macOS system files
+.DS_Store
