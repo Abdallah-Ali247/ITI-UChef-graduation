@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Virtual Environment
+venv/
+
+# Environment Variables
+.env
+
+# Django migrations
+*/migrations/
+*.log
+
+# VSCode settings (if you use VSCode)
+.vscode/
+
+# macOS files
+.DS_Store
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Virtual Environment
+venv/
+
+# Environment Variables
+.env
+
+# Django migrations
+*/migrations/
+*.log
+
+# VSCode settings (if you use VSCode)
+.vscode/
+
+# macOS files
+.DS_Store
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+# Ignore virtual environment
+venv/
+
+# Ignore SQLite database
+db.sqlite3
+
+# Ignore Python cache
+__pycache__/
+*.pyc
