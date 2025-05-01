@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from .models import Order, OrderItem, Payment
 from .serializers import OrderSerializer, OrderItemSerializer, PaymentSerializer
 from restaurants.models import Restaurant
+# Import for notifications
+from notifications.views import create_notification
 
 class IsOrderOwnerOrRestaurantOwnerOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -260,6 +262,24 @@ class OrderViewSet(viewsets.ModelViewSet):
         if payment_data:
             Payment.objects.create(order=order, **payment_data)
         
+        # Create notification for the restaurant about the new order
+        try:
+            # Notify restaurant owner about the new order
+            create_notification(
+                recipient_id=order.restaurant.owner.id,
+                notification_type='new_order',
+                title='New Order Received',
+                message=f'You have received a new order #{order.id} from {order.user.username}.',
+                sender_id=order.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
+        except Exception as e:
+            # Log any errors but continue processing the order
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error creating notification for new order: {str(e)}")
+        
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['post'])
@@ -275,8 +295,70 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'You do not have permission to update this order status'}, 
                            status=status.HTTP_403_FORBIDDEN)
         
+        # Get the previous status for notification purposes
+        previous_status = order.status
+        
         order.status = status_value
         order.save()
+        
+        # Create appropriate notifications based on the status change
+        if status_value == 'confirmed':
+            # Notify customer that their order has been accepted
+            create_notification(
+                recipient_id=order.user.id,
+                notification_type='order_accepted',
+                title='Order Accepted',
+                message=f'Your order #{order.id} has been accepted by {order.restaurant.name}.',
+                sender_id=request.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
+        elif status_value == 'cancelled':
+            reason = request.data.get('reason', 'No reason provided')
+            # Notify customer that their order has been rejected/cancelled
+            create_notification(
+                recipient_id=order.user.id,
+                notification_type='order_rejected',
+                title='Order Rejected',
+                message=f'Your order #{order.id} has been rejected by {order.restaurant.name}. Reason: {reason}',
+                sender_id=request.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
+        elif status_value == 'ready':
+            # Notify customer that their order is ready for pickup
+            create_notification(
+                recipient_id=order.user.id,
+                notification_type='order_ready',
+                title='Order Ready',
+                message=f'Your order #{order.id} from {order.restaurant.name} is ready for pickup.',
+                sender_id=request.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
+        elif status_value == 'delivered':
+            # Notify customer that their order has been delivered
+            create_notification(
+                recipient_id=order.user.id,
+                notification_type='order_delivered',
+                title='Order Delivered',
+                message=f'Your order #{order.id} from {order.restaurant.name} has been delivered.',
+                sender_id=request.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
+        else:
+            # General status update notification
+            status_display = dict(Order.STATUS_CHOICES).get(status_value, status_value)
+            create_notification(
+                recipient_id=order.user.id,
+                notification_type='order_status_update',
+                title=f'Order Status Update: {status_display}',
+                message=f'Your order #{order.id} from {order.restaurant.name} has been updated to: {status_display}',
+                sender_id=request.user.id,
+                restaurant_id=order.restaurant.id,
+                order_id=order.id
+            )
         
         return Response(OrderSerializer(order).data)
 

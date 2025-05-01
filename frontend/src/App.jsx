@@ -36,6 +36,7 @@ import Profile from './pages/user/Profile'
 import RestaurantDashboard from './pages/dashboard/RestaurantDashboard'
 import AdminDashboard from './pages/dashboard/AdminDashboard'
 import AdminUserForm from './pages/admin/AdminUserForm'
+import NotificationsPage from './pages/NotificationsPage'
 import NotFound from './pages/NotFound'
 
 // CSS
@@ -117,6 +118,11 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <NotificationsPage />
               </ProtectedRoute>
             } />
             

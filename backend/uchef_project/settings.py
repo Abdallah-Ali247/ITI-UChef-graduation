@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'meals',
     'orders',
     'reviews',
+    'notifications',  # Add notifications app
 ]
 
 MIDDLEWARE = [

@@ -2,9 +2,11 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { clearCart } from '../../store/slices/cartSlice';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { FaSun, FaMoon, FaShoppingCart, FaUser } from 'react-icons/fa';
+import NotificationIcon from '../notifications/NotificationIcon';
+import NotificationList from '../notifications/NotificationList';
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -12,6 +14,7 @@ const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   const handleLogout = () => {
     // Clear the cart when logging out
@@ -107,6 +110,15 @@ const Header = () => {
                 {items.length > 0 && <span className="cart-badge">{items.length}</span>}
               </NavLink>
             </li>
+            
+            {isAuthenticated && (
+              <li className="nav-item notification-item relative">
+                <div onClick={() => setNotificationOpen(!notificationOpen)} className="nav-link cursor-pointer" style={{ color: 'var(--header-text)' }}>
+                  <NotificationIcon />
+                </div>
+                <NotificationList isOpen={notificationOpen} onClose={() => setNotificationOpen(false)} />
+              </li>
+            )}
             
             <li className="nav-item theme-toggle">
               <button onClick={toggleTheme} className="theme-btn" aria-label="Toggle theme" style={{ color: 'var(--header-text)' }}>
