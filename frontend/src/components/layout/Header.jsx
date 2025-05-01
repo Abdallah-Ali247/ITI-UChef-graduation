@@ -2,9 +2,9 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { clearCart } from '../../store/slices/cartSlice';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
-import { FaSun, FaMoon, FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaSun, FaMoon, FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 
 const Header = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
@@ -12,6 +12,29 @@ const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // State for mobile menu toggle
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  
+  // Handle scroll effect for header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [navigate]);
 
   const handleLogout = () => {
     // Clear the cart when logging out
@@ -22,39 +45,36 @@ const Header = () => {
   };
 
   return (
-    <header className="header" style={{ 
-      backgroundColor: 'var(--header-bg)', 
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-    }}>
+    <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         <Link to="/" className="logo">
-          <span className="logo-text" style={{ 
-            color: 'var(--header-text)', 
-            fontFamily: '"Playfair Display", serif',
-            fontSize: '1.8rem',
-            fontWeight: '700',
-            background: 'linear-gradient(45deg, var(--accent-color) 0%, var(--header-text) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
+          <span className="logo-text">
             UChef
           </span>
         </Link>
         
-        <nav>
+        {/* Mobile menu toggle button */}
+        <button 
+          className="mobile-menu-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
+        
+        <nav className={mobileMenuOpen ? 'open' : ''}>
           <ul className="nav-menu">
             <li className="nav-item">
-              <NavLink to="/" className="nav-link" style={{ color: 'var(--header-text)' }}>Home</NavLink>
+              <NavLink to="/" className="nav-link">Home</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/restaurants" className="nav-link" style={{ color: 'var(--header-text)' }}>Restaurants</NavLink>
+              <NavLink to="/restaurants" className="nav-link">Restaurants</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/meals" className="nav-link" style={{ color: 'var(--header-text)' }}>Meals</NavLink>
+              <NavLink to="/meals" className="nav-link">Meals</NavLink>
             </li>
             <li className="nav-item">
-              <NavLink to="/top-custom-meals" className="nav-link" style={{ color: 'var(--header-text)' }}>Top Custom Meals</NavLink>
+              <NavLink to="/top-custom-meals" className="nav-link">Top Custom Meals</NavLink>
             </li>
             
             {isAuthenticated ? (
@@ -62,29 +82,29 @@ const Header = () => {
                 {/* Show different navigation based on user type */}
                 {user?.user_type === 'restaurant' && (
                   <li className="nav-item">
-                    <NavLink to="/restaurant-dashboard" className="nav-link" style={{ color: 'var(--header-text)' }}>Restaurant Dashboard</NavLink>
+                    <NavLink to="/restaurant-dashboard" className="nav-link restaurant-dashboard-link">Restaurant Dashboard</NavLink>
                   </li>
                 )}
                 
                 {user?.user_type === 'admin' && (
                   <li className="nav-item">
-                    <NavLink to="/admin-dashboard" className="nav-link" style={{ color: 'var(--header-text)' }}>Admin Dashboard</NavLink>
+                    <NavLink to="/admin-dashboard" className="nav-link admin-dashboard-link">Admin Dashboard</NavLink>
                   </li>
                 )}
                 
                 {user?.user_type === 'customer' && (
                   <li className="nav-item">
-                    <NavLink to="/orders" className="nav-link" style={{ color: 'var(--header-text)' }}>My Orders</NavLink>
+                    <NavLink to="/orders" className="nav-link orders-link">My Orders</NavLink>
                   </li>
                 )}
                 
                 <li className="nav-item">
-                  <NavLink to="/profile" className="nav-link" style={{ color: 'var(--header-text)' }}>
+                  <NavLink to="/profile" className="nav-link">
                     <FaUser className="nav-icon" /> Profile
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <button onClick={handleLogout} className="nav-link logout-btn" style={{ color: 'var(--header-text)' }}>
+                  <button onClick={handleLogout} className="nav-link logout-btn">
                     Logout
                   </button>
                 </li>
@@ -92,16 +112,16 @@ const Header = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <NavLink to="/login" className="nav-link" style={{ color: 'var(--header-text)' }}>Login</NavLink>
+                  <NavLink to="/login" className="nav-link">Login</NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink to="/register" className="nav-link" style={{ color: 'var(--header-text)' }}>Register</NavLink>
+                  <NavLink to="/register" className="nav-link">Register</NavLink>
                 </li>
               </>
             )}
             
             <li className="nav-item cart-item">
-              <NavLink to="/cart" className="nav-link cart-link" style={{ color: 'var(--header-text)' }}>
+              <NavLink to="/cart" className="nav-link cart-link">
                 <FaShoppingCart className="nav-icon" />
                 <span>Cart</span>
                 {items.length > 0 && <span className="cart-badge">{items.length}</span>}
@@ -109,7 +129,11 @@ const Header = () => {
             </li>
             
             <li className="nav-item theme-toggle">
-              <button onClick={toggleTheme} className="theme-btn" aria-label="Toggle theme" style={{ color: 'var(--header-text)' }}>
+              <button 
+                onClick={toggleTheme} 
+                className="theme-btn" 
+                aria-label="Toggle theme"
+              >
                 {theme === 'light' ? <FaMoon className="theme-icon" /> : <FaSun className="theme-icon" />}
               </button>
             </li>

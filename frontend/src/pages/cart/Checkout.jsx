@@ -56,7 +56,9 @@ const CheckoutForm = ({ formData, setFormData, handleSubmit, items, total }) => 
                 <>
                     <div className="form-group">
                         <label htmlFor="card-element" className="form-label">Credit Card Details</label>
-                        <CardElement id="card-element" className="form-control" />
+                        <div style={{ padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)', backgroundColor: 'var(--bg-color-secondary)' }}>
+                            <CardElement id="card-element" options={{ style: { base: { fontSize: '16px', color: 'var(--text-color)' } } }} />
+                        </div>
                     </div>
                     {error && <div className="alert alert-danger">{error}</div>}
                 </>
@@ -150,17 +152,19 @@ const Checkout = () => {
     };
 
     return (
-        <div className="checkout-page">
-            <h1>Checkout</h1>
+        <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '1rem' }}>
+            <h1 style={{ marginBottom: '0.5rem', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}>Checkout</h1>
+            <p style={{ marginBottom: '1.5rem', color: 'var(--text-color-secondary)' }}>Complete your order from {restaurantName}</p>
 
-            {error && (
-                <div className="alert alert-danger">
-                    {typeof error === 'object' ? Object.values(error).flat().join(', ') : error}
-                </div>
-            )}
+            {error && <div className="alert alert-danger" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginTop: '2rem' }}>
-                <div className="checkout-form">
+            <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))', 
+                gap: '1.5rem'
+            }}>
+                <div className="card" style={{ padding: 'clamp(1rem, 3vw, 2rem)' }}>
+                    <h2 style={{ marginBottom: '1.5rem', fontSize: 'clamp(1.25rem, 3vw, 1.5rem)' }}>Delivery Information</h2>
                     {formData.payment_method === 'credit_card' ? (
                         <Elements stripe={stripePromise}>
                             <CheckoutForm
@@ -174,24 +178,22 @@ const Checkout = () => {
                     ) : (
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label htmlFor="delivery_address" className="form-label">
-                                    Delivery Address
-                                </label>
-                                <textarea
+                                <label htmlFor="delivery_address" className="form-label" style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>Delivery Address*</label>
+                                <input
+                                    type="text"
                                     id="delivery_address"
                                     name="delivery_address"
                                     value={delivery_address}
                                     onChange={handleChange}
                                     className="form-control"
-                                    rows="3"
+                                    placeholder="Enter your delivery address"
                                     required
-                                ></textarea>
+                                    style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}
+                                />
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="delivery_notes" className="form-label">
-                                    Delivery Notes (Optional)
-                                </label>
+                                <label htmlFor="delivery_notes" className="form-label" style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>Delivery Notes</label>
                                 <textarea
                                     id="delivery_notes"
                                     name="delivery_notes"
@@ -200,45 +202,72 @@ const Checkout = () => {
                                     className="form-control"
                                     rows="2"
                                     placeholder="Any special delivery instructions?"
+                                    style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}
                                 ></textarea>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Payment Method</label>
+                                <label className="form-label" style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>Payment Method</label>
 
-                                <div style={{ marginTop: '0.5rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                <div style={{ 
+                                    marginTop: '0.5rem', 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    gap: '0.5rem'
+                                }}>
+                                    <label style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        padding: '0.75rem', 
+                                        borderRadius: 'var(--border-radius)', 
+                                        border: payment_method === 'cash' ? '2px solid var(--primary-color)' : '1px solid var(--border-color)', 
+                                        backgroundColor: payment_method === 'cash' ? 'var(--bg-color-secondary)' : 'transparent',
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'pointer'
+                                    }}>
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="cash"
                                             checked={payment_method === 'cash'}
                                             onChange={handleChange}
-                                            style={{ marginRight: '0.5rem' }}
+                                            style={{ marginRight: '0.75rem' }}
                                         />
-                                        Cash on Delivery
+                                        <span style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>Cash on Delivery</span>
                                     </label>
 
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                                    <label style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        padding: '0.75rem', 
+                                        borderRadius: 'var(--border-radius)', 
+                                        border: payment_method === 'credit_card' ? '2px solid var(--primary-color)' : '1px solid var(--border-color)', 
+                                        backgroundColor: payment_method === 'credit_card' ? 'var(--bg-color-secondary)' : 'transparent',
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'pointer'
+                                    }}>
                                         <input
                                             type="radio"
                                             name="payment_method"
                                             value="credit_card"
                                             checked={payment_method === 'credit_card'}
                                             onChange={handleChange}
-                                            style={{ marginRight: '0.5rem' }}
+                                            style={{ marginRight: '0.75rem' }}
                                         />
-                                        Credit Card
+                                        <span style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)' }}>Credit Card</span>
                                     </label>
-
-                                    
                                 </div>
                             </div>
 
                             <button
                                 type="submit"
                                 className="btn btn-primary"
-                                style={{ width: '100%', marginTop: '1.5rem' }}
+                                style={{ 
+                                    width: '100%', 
+                                    marginTop: '1.5rem',
+                                    padding: 'clamp(0.75rem, 2vw, 1rem)',
+                                    fontSize: 'clamp(0.9rem, 2vw, 1rem)'
+                                }}
                                 disabled={loading}
                             >
                                 {loading ? 'Processing...' : 'Place Order'}
@@ -247,28 +276,55 @@ const Checkout = () => {
                     )}
                 </div>
 
-                <div className="order-summary">
-                    <div className="card">
-                        <div className="card-body">
-                            <h2>Order Summary</h2>
-                            <p>From {restaurantName}</p>
+                <div style={{ 
+                    position: 'sticky', 
+                    top: '1rem',
+                    height: 'fit-content',
+                    alignSelf: 'flex-start'
+                }}>
+                    <div className="card" style={{ padding: 'clamp(1rem, 3vw, 1.5rem)' }}>
+                        <h2 style={{ marginBottom: '1rem', fontSize: 'clamp(1.25rem, 3vw, 1.5rem)' }}>Order Summary</h2>
+                        <p style={{ color: 'var(--text-color-secondary)', marginBottom: '1rem', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>From {restaurantName}</p>
 
-                            <div style={{ margin: '1.5rem 0', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                                {items.map((item) => (
-                                    <div
-                                        key={`${item.type}-${item.id || item.customMealId}-checkout`}
-                                        style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}
-                                    >
-                                        <span>{item.name} x {item.quantity}</span>
-                                        <span>${(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                ))}
-                            </div>
+                        <div style={{ 
+                            margin: '1.5rem 0', 
+                            borderBottom: '1px solid var(--border-color)', 
+                            paddingBottom: '1rem',
+                            maxHeight: items.length > 5 ? '200px' : 'auto',
+                            overflowY: items.length > 5 ? 'auto' : 'visible',
+                            paddingRight: items.length > 5 ? '0.5rem' : '0'
+                        }}>
+                            {items.map((item) => (
+                                <div
+                                    key={`${item.type}-${item.id || item.customMealId}-checkout`}
+                                    style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        marginBottom: '0.75rem',
+                                        fontSize: 'clamp(0.85rem, 2vw, 0.95rem)'
+                                    }}
+                                >
+                                    <span style={{ 
+                                        maxWidth: '70%', 
+                                        overflow: 'hidden', 
+                                        textOverflow: 'ellipsis', 
+                                        whiteSpace: 'nowrap' 
+                                    }}>{item.name} x {item.quantity}</span>
+                                    <span style={{ fontWeight: '500' }}>${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            ))}
+                        </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                                <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
-                            </div>
+                        <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            fontWeight: 'bold', 
+                            fontSize: 'clamp(1.1rem, 2.5vw, 1.2rem)', 
+                            padding: '0.5rem 0',
+                            marginBottom: '0.5rem'
+                        }}>
+                            <span>Total</span>
+                            <span>${total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>

@@ -50,22 +50,32 @@
   align-items: center;
 }
 
-.star {
+.stars .star,
+.review-rating .star,
+.rating-input .star {
+  position: static !important;
   font-size: 1.25rem;
   color: var(--border-color);
   margin-right: 2px;
+  width: auto;
+  height: auto;
+  background-color: transparent;
+  box-shadow: none;
 }
 
-.star.filled {
+.stars .star.filled,
+.review-rating .star.filled,
+.rating-input .star.filled {
   color: var(--star-color, #ffc107);
 }
 
 .review-form {
   margin-bottom: 2rem;
   padding: 1.5rem;
-  background-color: white;
+  background-color: var(--card-bg, white);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow-light);
+  color: var(--review-text-color, var(--text-color));
 }
 
 .review-form h3 {
@@ -90,12 +100,14 @@
   border-radius: var(--border-radius);
   resize: vertical;
   min-height: 100px;
+  background-color: var(--card-bg, white);
+  color: var(--review-text-color, var(--text-color));
 }
 
 .form-group small {
   display: block;
   margin-top: 0.25rem;
-  color: var(--text-muted);
+  color: var(--text-color-secondary, var(--text-muted));
 }
 
 .rating-input {
@@ -107,6 +119,8 @@
 .star-label {
   cursor: pointer;
   margin-right: 0.5rem;
+  position: relative;
+  display: inline-block;
 }
 
 .star-input {
@@ -115,6 +129,8 @@
   cursor: pointer;
   height: 0;
   width: 0;
+  left: 0;
+  top: 0;
 }
 
 .error-message {
@@ -158,9 +174,10 @@
 
 .review-card {
   padding: 1.5rem;
-  background-color: white;
+  background-color: var(--card-bg, white);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow-light);
+  color: var(--review-text-color, var(--text-color));
 }
 
 .review-header {
@@ -177,12 +194,12 @@
 
 .review-date {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--text-color-secondary, var(--text-muted));
   margin-top: 0.25rem;
 }
 
 .review-content {
-  color: var(--text-color);
+  color: var(--review-text-color, var(--text-color));
   line-height: 1.5;
 }
 
@@ -198,6 +215,12 @@
   box-shadow: var(--box-shadow-light);
 }
 
+/* Star rating specific styles */
+.review-rating {
+  display: flex;
+  align-items: center;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .review-header {
@@ -206,7 +229,9 @@
   }
   
   .review-rating {
-    margin-top: 0.5rem;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
   }
   
   .action-buttons {

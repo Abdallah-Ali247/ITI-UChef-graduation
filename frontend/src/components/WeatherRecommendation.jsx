@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { FaIceCream, FaCoffee, FaMugHot, FaGlassWhiskey, FaSnowflake, FaSun } from 'react-icons/fa';
+import hotDrinkImage from '../assets/hotDirnk.jpg';
+import icedCoffeeImage from '../assets/iced-coffee-05.jpg';
+import { FaAngleRight } from 'react-icons/fa';
 
 const WeatherRecommendation = () => {
   const [weatherData, setWeatherData] = useState(null);
@@ -12,16 +15,19 @@ const WeatherRecommendation = () => {
   const { meals } = useSelector(state => state.meals);
 
   useEffect(() => {
-    const fetchWeatherData = async () => {
+    const fetchWeatherData = async (latitude, longitude) => {
       try {
         setLoading(true);
         // Use OpenWeatherMap API directly with a free API key
         // This is a demo API key with limited usage - in production, use environment variables
         const apiKey = '4d8fb5b93d4af21d66a2948710284366';
-        const city = 'Cairo'; // Default city
-        const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
-        );
+        
+        // Use coordinates if available, otherwise fallback to city name
+        const url = latitude && longitude
+          ? `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
+          : `https://api.openweathermap.org/data/2.5/weather?q=Cairo&appid=${apiKey}&units=metric`;
+        
+        const response = await axios.get(url);
         
         if (response.status === 200) {
           const data = {
@@ -42,7 +48,7 @@ const WeatherRecommendation = () => {
         // Fallback to simulated weather data for demo purposes
         const simulatedData = {
           success: true,
-          city: 'Cairo',
+          city: 'Unknown Location',
           temperature: Math.random() > 0.5 ? 28 : 22, // Randomly choose hot or cold
           description: Math.random() > 0.5 ? 'clear sky' : 'few clouds',
           humidity: 65,
@@ -55,7 +61,28 @@ const WeatherRecommendation = () => {
       }
     };
 
-    fetchWeatherData();
+    // Get user's location using browser's Geolocation API
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Success callback - got coordinates
+          const { latitude, longitude } = position.coords;
+          console.log('Got location:', latitude, longitude);
+          fetchWeatherData(latitude, longitude);
+        },
+        (error) => {
+          // Error callback - couldn't get location
+          console.error('Geolocation error:', error.message);
+          // Fallback to default location
+          fetchWeatherData();
+        },
+        { timeout: 10000 } // 10 second timeout
+      );
+    } else {
+      // Browser doesn't support geolocation
+      console.log('Geolocation is not supported by this browser');
+      fetchWeatherData(); // Fallback to default location
+    }
   }, []);
 
   const fetchRecommendations = async (temperature) => {
@@ -104,15 +131,15 @@ const WeatherRecommendation = () => {
       // Fallback to default recommendations if no matching meals found
       if (temperature > 25) {
         setRecommendations([
-          { id: 'default-1', name: 'Ice Cream', description: 'Cool down with some refreshing ice cream' },
-          { id: 'default-2', name: 'Cold Brew Coffee', description: 'Energize with a refreshing cold brew' },
-          { id: 'default-3', name: 'Fruit Smoothie', description: 'Healthy and refreshing fruit smoothie' }
+          { id: 'default-1', name: 'Ice Cream', description: 'Cool down with some refreshing ice cream', image: icedCoffeeImage },
+          { id: 'default-2', name: 'Cold Brew Coffee', description: 'Energize with a refreshing cold brew', image: icedCoffeeImage },
+          { id: 'default-3', name: 'Fruit Smoothie', description: 'Healthy and refreshing fruit smoothie', image: icedCoffeeImage }
         ]);
       } else {
         setRecommendations([
-          { id: 'default-1', name: 'Hot Chocolate', description: 'Warm up with a delicious hot chocolate' },
-          { id: 'default-2', name: 'Spiced Chai Latte', description: 'A comforting spiced chai latte' },
-          { id: 'default-3', name: 'Cappuccino', description: 'Classic cappuccino to warm your day' }
+          { id: 'default-1', name: 'Hot Chocolate', description: 'Warm up with a delicious hot chocolate', image: hotDrinkImage },
+          { id: 'default-2', name: 'Spiced Chai Latte', description: 'A comforting spiced chai latte', image: hotDrinkImage },
+          { id: 'default-3', name: 'Cappuccino', description: 'Classic cappuccino to warm your day', image: hotDrinkImage }
         ]);
       }
     } catch (error) {
@@ -120,15 +147,15 @@ const WeatherRecommendation = () => {
       // Set default recommendations based on temperature
       if (temperature > 25) {
         setRecommendations([
-          { id: 'default-1', name: 'Ice Cream', description: 'Cool down with some refreshing ice cream' },
-          { id: 'default-2', name: 'Cold Brew Coffee', description: 'Energize with a refreshing cold brew' },
-          { id: 'default-3', name: 'Fruit Smoothie', description: 'Healthy and refreshing fruit smoothie' }
+          { id: 'default-1', name: 'Ice Cream', description: 'Cool down with some refreshing ice cream', image: icedCoffeeImage },
+          { id: 'default-2', name: 'Cold Brew Coffee', description: 'Energize with a refreshing cold brew', image: icedCoffeeImage },
+          { id: 'default-3', name: 'Fruit Smoothie', description: 'Healthy and refreshing fruit smoothie', image: icedCoffeeImage }
         ]);
       } else {
         setRecommendations([
-          { id: 'default-1', name: 'Hot Chocolate', description: 'Warm up with a delicious hot chocolate' },
-          { id: 'default-2', name: 'Spiced Chai Latte', description: 'A comforting spiced chai latte' },
-          { id: 'default-3', name: 'Cappuccino', description: 'Classic cappuccino to warm your day' }
+          { id: 'default-1', name: 'Hot Chocolate', description: 'Warm up with a delicious hot chocolate', image: hotDrinkImage },
+          { id: 'default-2', name: 'Spiced Chai Latte', description: 'A comforting spiced chai latte', image: hotDrinkImage },
+          { id: 'default-3', name: 'Cappuccino', description: 'Classic cappuccino to warm your day', image: hotDrinkImage }
         ]);
       }
     }
@@ -159,56 +186,51 @@ const WeatherRecommendation = () => {
   const RecommendationIcon = isHot ? FaIceCream : FaMugHot;
 
   return (
-    <section className={`weather-recommendation-section ${backgroundClass}`}>
-      <div className="container">
-        <div className="weather-header">
-          <WeatherIcon className="weather-icon" />
-          <h2>Weather-Based Recommendations</h2>
-        </div>
-        
-        <div className="weather-info">
-          <p>
-            It's {temperatureText} today in {weatherData.city} with a temperature of {Math.round(weatherData.temperature)}°C!
-            {isHot ? (
-              <span> How about something refreshing?</span>
-            ) : (
-              <span> How about something to warm you up?</span>
-            )}
-          </p>
-        </div>
-
-        {recommendations.length > 0 ? (
-          <div className="recommendation-cards">
-            {recommendations.map((item, index) => (
-              <div key={item.id} className="recommendation-card">
-                <div className="recommendation-icon">
-                  {isHot ? <FaGlassWhiskey /> : <FaCoffee />}
-                </div>
-                <h3>{item.name}</h3>
-                <p>{item.description}</p>
-                {item.id.startsWith('default') ? (
-                  <Link to="/restaurants" className="btn btn-sm">Find Similar</Link>
-                ) : (
-                  <Link to={`/meals/${item.id}`} className="btn btn-sm">View Details</Link>
-                )}
-              </div>
-            ))}
+    <section className="weather-recommendation-section">
+      <div className="weather-card-container">
+        <div className={`weather-card ${isHot ? 'hot-card' : 'cold-card'}`}>
+          <div className="weather-image-side">
+            <img 
+              src={isHot ? icedCoffeeImage : hotDrinkImage} 
+              alt={isHot ? "Cool refreshing drink" : "Warm comforting drink"} 
+              className="weather-image animate-fade-in"
+            />
+            <div className="weather-temp-badge">
+              <span>{Math.round(weatherData.temperature)}°C</span>
+            </div>
           </div>
-        ) : (
-          <div className="no-recommendations">
-            <RecommendationIcon className="recommendation-icon" />
-            <p>
-              {isHot ? (
-                <>We recommend trying some refreshing cold drinks or ice cream today!</>
-              ) : (
-                <>We recommend trying some comforting hot drinks to warm up today!</>
-              )}
-            </p>
-            <Link to="/restaurants" className="btn btn-primary">
-              Explore Restaurants
-            </Link>
+          
+          <div className="weather-content-side">
+            <div className="weather-icon-wrapper animate-bounce">
+              <WeatherIcon className="weather-icon" />
+            </div>
+            
+            <h2 className="weather-title animate-slide-in">
+              {isHot ? "Beat the Heat!" : "Stay Cozy!"}
+            </h2>
+            
+            <div className="weather-location animate-fade-in">
+              <p>{weatherData.city} • {weatherData.description}</p>
+            </div>
+            
+            <div className="weather-message animate-slide-up">
+              <p>
+                {isHot
+                  ? "Looking for something refreshing? Our restaurants offer delicious cold treats to help you cool down on this hot day."
+                  : "Warm up with something delicious! Our restaurants offer comforting hot drinks perfect for this cool weather."}
+              </p>
+            </div>
+            
+            <div className="weather-cta animate-fade-in">
+              <Link 
+                to="/restaurants" 
+                className={`btn-recommendation ${isHot ? 'btn-cool' : 'btn-warm'}`}
+              >
+                Find {isHot ? "Cool Treats" : "Warm Drinks"} <FaAngleRight />
+              </Link>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

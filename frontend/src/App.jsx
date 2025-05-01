@@ -74,7 +74,7 @@ function App() {
 
   return (
     <Router>
-      <div className="app-container">
+      <div className="app-container bg-pattern-light bg-food-pattern">
         <ToastContainer position="top-right" autoClose={3000} />
         <Header />
         <main className="main-content">
