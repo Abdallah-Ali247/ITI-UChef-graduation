@@ -25,7 +25,7 @@ export const ThemeProvider = ({ children }) => {
   // Create falling stars animation
   const createFallingStars = () => {
     // Clean up any existing stars
-    const existingStars = document.querySelectorAll('.star');
+    const existingStars = document.querySelectorAll('.animation-star');
     existingStars.forEach(star => star.remove());
     
     // Create stars on both sides
@@ -36,7 +36,7 @@ export const ThemeProvider = ({ children }) => {
       for (let i = 0; i < starCount; i++) {
         // Create a star element
         const star = document.createElement('div');
-        star.classList.add('star', `star-${side}`);
+        star.classList.add('animation-star', `animation-star-${side}`);
         
         // Add variety with random classes
         const size = ['small', 'medium', 'large'][Math.floor(Math.random() * 3)];
@@ -74,6 +74,9 @@ export const ThemeProvider = ({ children }) => {
 
   // Toggle between light and dark themes
   const toggleTheme = () => {
+    // Add theme-changing class to body for animations
+    document.body.classList.add('theme-changing');
+    
     setTheme(prevTheme => {
       const newTheme = prevTheme === 'light' ? 'dark' : 'light';
       
@@ -84,6 +87,11 @@ export const ThemeProvider = ({ children }) => {
       
       return newTheme;
     });
+    
+    // Remove theme-changing class after animation completes
+    setTimeout(() => {
+      document.body.classList.remove('theme-changing');
+    }, 600); // Match the animation duration
   };
 
   return (

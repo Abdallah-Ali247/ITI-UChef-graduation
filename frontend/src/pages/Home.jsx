@@ -10,6 +10,8 @@ import 'slick-carousel/slick/slick-theme.css';
 import { FaStar, FaUtensils, FaDollarSign, FaAngleRight, FaTags, FaStore, FaHeart, FaTag, FaDice, FaShoppingCart } from 'react-icons/fa';
 import { FaPizzaSlice, FaShippingFast  } from "react-icons/fa";
 import { toast } from 'react-toastify';
+import WeatherRecommendation from '../components/WeatherRecommendation';
+import '../styles/weather.css';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -491,6 +493,9 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Weather-based Recommendation Section */}
+      <WeatherRecommendation />
+      
       {/* Featured Custom Meals Section with pattern background */}
       <section className="section-accent pattern-bg">
         <div className="container">

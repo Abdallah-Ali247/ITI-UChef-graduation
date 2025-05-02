@@ -62,6 +62,7 @@ class MealViewSet(viewsets.ModelViewSet):
             'unavailable_ingredients': unavailable_ingredients
         })
     
+    
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]

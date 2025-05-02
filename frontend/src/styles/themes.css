@@ -1,33 +1,37 @@
 /* Theme Variables */
 :root {
-  /* Light Theme (Default) - Food Service Theme */
-  --primary-color: #E83F22; /* Deeper tomato red */
-  --secondary-color: #2D8C7F; /* Richer teal */
-  --accent-color: #EDAA00; /* Warm amber */
-  --accent-color-secondary: #4A9630; /* Deeper herb green */
-  --accent-color-tertiary: #E8701A; /* Rich orange */
+  /* Light Theme (Default) - Modern Food Service Theme */
+  --primary-color: #FF4B2B; /* Vibrant coral red */
+  --secondary-color: #2A9D8F; /* Modern teal */
+  --accent-color: #FFB100; /* Bright amber */
+  --accent-color-secondary: #4CAF50; /* Fresh green */
+  --accent-color-tertiary: #FF7E47; /* Tangerine orange */
   
   /* Text colors */
-  --text-color: #2C2C2C; /* Near black */
-  --text-color-secondary: #494949; /* Dark gray */
-  --review-text-color: #2C2C2C; /* Match text color */
+  --text-color: #333333; /* Rich dark gray */
+  --text-color-secondary: #555555; /* Medium gray */
+  --text-color-tertiary: #777777; /* Light gray for less important text */
+  --review-text-color: #333333; /* Match text color */
   --header-text: #FFFFFF; /* Clean white for contrast */
   --dice-color: #000000; /* Black dice in light mode */
   
   /* Background colors */
-  --bg-color: #F7F0E2; /* Muted cream - less bright */
-  --bg-color-secondary: #F0E6D3; /* Deeper egg-shell */
-  --bg-pattern: linear-gradient(135deg, rgba(232, 63, 34, 0.15) 0%, rgba(247, 240, 226, 1) 100%); /* Tomato to cream gradient */
-  --bg-accent: #EDE3D2; /* Warm beige */
-  --bg-accent-secondary: #E6D8C4; /* Richer toast color */
+  --bg-color: #f5f7fa; /* Light base background */
+  --bg-color-secondary: #eef2f7; /* Slightly darker background */
+  --bg-pattern: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23FF4B2B' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(255, 75, 43, 0.05) 0%, rgba(248, 249, 250, 1) 100%); /* Pattern with subtle gradient */
+  --bg-accent: #E9ECEF; /* Light accent background */
+  --bg-accent-secondary: #DEE2E6; /* Slightly darker accent */
+  --bg-color-warning: #FFF8E6; /* Light amber for warnings */
+  --text-color-warning: #D97706; /* Amber text for warnings */
   
   /* Card styles */
-  --card-bg: #FEFAF2; /* Softened white */
-  --card-shadow: 0 8px 20px rgba(232, 63, 34, 0.1); /* Soft tomato shadow */
-  --card-border: 1px solid #E8DBC7; /* Visible but soft border */
-  --card-hover-border: 1px solid #D9C9AD; /* More noticeable border on hover */
-  --card-radius: 10px; /* Slightly less rounded */
-  --border-color: #E8DBC7;
+  --card-bg: #FFFFFF; /* Clean white */
+  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 5px 10px rgba(0, 0, 0, 0.02); /* Subtle shadow */
+  --card-border: 1px solid rgba(0, 0, 0, 0.05); /* Very subtle border */
+  --card-hover-border: 1px solid rgba(0, 0, 0, 0.1); /* Slightly more visible on hover */
+  --card-radius: 12px; /* More rounded corners */
+  --border-color: rgba(0, 0, 0, 0.1); /* Subtle border */
+  --border-color-light: rgba(0, 0, 0, 0.05); /* Very subtle border */
   
   /* Button styles */
   --view-details-bg: #E8701A; /* Rich orange */
@@ -36,9 +40,10 @@
   --price-tag-color: #4A9630; /* Deeper green */
   
   /* Header and footer */
-  --header-bg: rgba(0, 0, 0, 0.85); /* Semi-transparent black */
-  --header-text: #FFFFFF; /* White for contrast */
-  --footer-bg: #2D2D2D; /* Near black */
+  --header-bg: #FFFFFF; /* White navbar */
+  --header-text: #333333; /* Dark text for contrast */
+  --header-text-hover: #FF4B2B; /* Coral hover color */
+  --footer-bg: #1A1A2E; /* Deep blue-black */
   --footer-text: #F3F3F3; /* Off-white */
   
   /* Status colors */
@@ -48,9 +53,19 @@
   --info-color: #2D8C7F; /* Deeper teal */
   
   /* UI Elements */
-  --border-radius: 10px; /* Slightly less rounded */
-  --box-shadow: 0 8px 25px rgba(232, 63, 34, 0.15); /* More noticeable shadow */
-  --hover-transition: all 0.3s ease;
+  --border-radius: 12px; /* More rounded */
+  --border-radius-lg: 16px; /* Large border radius */
+  --border-radius-sm: 8px; /* Small border radius */
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+  --hover-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth transition */
+  
+  /* Font styles */
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --heading-font: 'Montserrat', 'Poppins', sans-serif;
+  --heading-weight: 700;
+  --body-weight: 400;
+  --body-line-height: 1.6;
+  --heading-line-height: 1.3;
   
   /* Food theme accent colors */
   --color-1: #E8701A; /* Rich orange */
@@ -72,41 +87,66 @@
   --accent-color-rgb: 237, 170, 0;
 }
 
-/* Dark Theme */
+/* Dark Theme - Enhanced */
 [data-theme="dark"] {
-  --primary-color: #ff6b6b;
+  /* Main colors - more vibrant */
+  --primary-color: #ff7b6b; /* Slightly brighter red */
   --secondary-color: #4ecdc4;
-  --accent-color: #f9bc60;
+  --accent-color: #ffd166; /* Brighter gold */
   --accent-color-secondary: #81b29a;
-  --accent-color-tertiary: #3d5a80;
-  --text-color: #f0f0f0;
-  --text-color-secondary: #cccccc;
-  --review-text-color: #000000; /* Black review text in dark mode */
-  --dice-color: #f9bc60; /* Golden dice in dark mode */
-  --bg-color: #121212;
-  --bg-color-secondary: #1e1e1e;
+  --accent-color-tertiary: #5d8ab8; /* Brighter blue */
+  
+  /* Text colors - improved contrast */
+  --text-color: #f8f8f8; /* Brighter white for better readability */
+  --text-color-secondary: #e8e8e8;
+  --text-color-tertiary: #b0b0b0; /* For less important text */
+  --review-text-color: #ffffff; /* Pure white for reviews */
+  --dice-color: #ffd166; /* Brighter gold dice */
+  
+  /* Background colors - richer dark theme */
+  --bg-color: #121212; /* Base dark */
+  --bg-color-secondary: #1e1e1e; /* Slightly lighter */
   --bg-pattern: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
   --bg-accent: #2c2c2c;
   --bg-accent-secondary: #252525;
+  --bg-color-warning: #332b19; /* Dark amber for warnings */
+  --text-color-warning: #ffd166; /* Amber text for warnings */
+  
+  /* Card styles - improved depth */
   --card-bg: #1e1e1e;
-  --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(255, 123, 107, 0.15);
   --card-border: 1px solid #2c2c2c;
   --card-hover-border: 1px solid #3c3c3c;
   --card-radius: 12px;
   --border-color: #333333;
-  /* Button styles */
-  --view-details-bg: #ff6b6b; /* Match primary */
+  --border-color-light: #2a2a2a; /* For subtle borders */
+  
+  /* Button styles - more vibrant */
+  --view-details-bg: #ff7b6b; /* Match primary */
   --view-details-color: #ffffff;
-  --price-tag-bg: #2c2c2c; /* Darker background */
-  --price-tag-color: #f9bc60; /* Match accent */
+  --price-tag-bg: #2a2a2a; /* Darker background */
+  --price-tag-color: #ffd166; /* Match accent */
+  
+  /* Header and footer */
   --header-bg: #1a1a1a;
-  --header-text: #f0f0f0;
+  --header-text: #ffffff;
+  --header-text-hover: #ff7b6b; /* Hover color for dark theme */
   --footer-bg: #0f0f0f;
-  --footer-text: #f0f0f0;
-  --info-color: #3498db;
-  --primary-color-rgb: 255, 107, 107;
+  --footer-text: #ffffff;
+  
+  /* Status colors - brighter */
+  --success-color: #4ade80; /* Brighter green */
+  --warning-color: #ffd166; /* Brighter amber */
+  --danger-color: #ff7b6b; /* Brighter red */
+  --info-color: #60a5fa; /* Brighter blue */
+  
+  /* RGB values for opacity */
+  --primary-color-rgb: 255, 123, 107;
   --secondary-color-rgb: 78, 205, 196;
-  --accent-color-rgb: 249, 188, 96;
+  --accent-color-rgb: 255, 209, 102;
+  
+  /* Form focus styles */
+  --input-focus-shadow: 0 0 0 3px rgba(255, 123, 107, 0.25);
 }
 
 /* Apply base styles */
@@ -119,7 +159,33 @@ body {
 
 /* Animation for theme transition */
 .theme-transition * {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  transition: background-color 0.4s ease-out, 
+              color 0.3s ease-out, 
+              border-color 0.3s ease, 
+              box-shadow 0.4s ease, 
+              transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Page transition effect when theme changes */
+@keyframes theme-page-transition {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+.theme-changing body {
+  animation: theme-page-transition 0.6s ease-in-out;
+}
+
+/* Card animation on theme change */
+@keyframes theme-card-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.theme-changing .card {
+  animation: theme-card-pop 0.5s ease-out;
 }
 
 /* Theme toggle button styles */
@@ -127,21 +193,71 @@ body {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 10px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-left: 8px;
+}
+
+.theme-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(var(--primary-color-rgb), 0.2) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform 0.4s ease;
+  border-radius: 50%;
+}
+
+.theme-btn:hover::before {
+  transform: scale(1.5);
 }
 
 .theme-btn:hover {
-  background-color: rgba(var(--primary-color-rgb), 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(var(--primary-color-rgb), 0.25);
+}
+
+.theme-btn:active {
+  transform: translateY(0);
 }
 
 .theme-icon {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--primary-color);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.theme-btn:hover .theme-icon {
+  transform: rotate(30deg);
+}
+
+/* Theme toggle animation */
+@keyframes theme-toggle-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(0.8);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.theme-changing .theme-icon {
+  animation: theme-toggle-spin 0.6s ease-in-out;
 }
 
 /* Cart badge */
