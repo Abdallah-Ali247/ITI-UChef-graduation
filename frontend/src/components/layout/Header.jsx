@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { clearCart } from '../../store/slices/cartSlice';
 import { useContext, useState, useEffect } from 'react';
+// import { useContext, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
-import { FaSun, FaMoon, FaShoppingCart, FaUser } from 'react-icons/fa';
+// import { FaSun, FaMoon, FaShoppingCart, FaUser } from 'react-icons/fa';
 import NotificationIcon from '../notifications/NotificationIcon';
 import NotificationList from '../notifications/NotificationList';
 import { FaSun, FaMoon, FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
@@ -15,6 +16,30 @@ const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  
+  // State for mobile menu toggle
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  
+  // Handle scroll effect for header
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [navigate]);
 
   const handleLogout = () => {
     // Clear the cart when logging out
