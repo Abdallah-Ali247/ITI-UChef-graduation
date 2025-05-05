@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { markNotificationAsRead, fetchUnreadNotifications } from '../../store/slices/notificationSlice';
 import { formatDistanceToNow } from 'date-fns';
 import { FaTimes, FaCheckCircle, FaTimesCircle, FaBell, FaUtensils, FaTruck } from 'react-icons/fa';
+import './notifications.css';
 
 const NotificationList = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
@@ -60,56 +61,58 @@ const NotificationList = ({ isOpen, onClose }) => {
   return (
     <div 
       ref={dropdownRef}
-      className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50 max-h-96 overflow-y-auto"
+      className="notification-dropdown"
     >
-      <div className="py-2 px-4 bg-gray-100 flex justify-between items-center">
-        <h3 className="text-sm font-medium text-gray-700">
+      <div className="notification-header">
+        <h3 className="notification-title">
           Notifications ({unreadNotifications.length})
         </h3>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <button onClick={onClose} className="notification-close-btn">
           <FaTimes />
         </button>
       </div>
       
       {loading ? (
-        <div className="p-4 text-center">
+        <div className="notification-loading">
+          <div className="notification-loader"></div>
           <p>Loading notifications...</p>
         </div>
       ) : unreadNotifications.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">
+        <div className="notification-empty">
+          <FaBell className="notification-empty-icon" />
           <p>No new notifications</p>
         </div>
       ) : (
-        <div>
+        <div className="notification-list">
           {unreadNotifications.map((notification) => (
             <Link 
               key={notification.id} 
               to={notification.order ? `/orders/${notification.order}` : '/notifications'}
-              className="block px-4 py-3 border-b border-gray-200 hover:bg-gray-50 transition duration-150 ease-in-out"
+              className="notification-item"
               onClick={() => handleNotificationClick(notification)}
             >
-              <div className="flex items-start">
-                <div className="flex-shrink-0 mr-3 mt-1">
+              <div className="notification-content">
+                <div className="notification-icon">
                   {getNotificationIcon(notification.notification_type)}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="notification-details">
+                  <p className="notification-title">
                     {notification.title}
                   </p>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="notification-message">
                     {notification.message}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="notification-time">
                     {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                   </p>
                 </div>
               </div>
             </Link>
           ))}
-          <div className="px-4 py-2 text-center border-t border-gray-200">
+          <div className="notification-footer">
             <Link 
               to="/notifications" 
-              className="text-sm text-blue-500 hover:text-blue-700 font-medium"
+              className="notification-view-all"
               onClick={onClose}
             >
               View all notifications

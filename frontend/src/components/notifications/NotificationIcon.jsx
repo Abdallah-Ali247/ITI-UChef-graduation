@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FaBell } from 'react-icons/fa';
 import { fetchUnreadNotifications } from '../../store/slices/notificationSlice';
+import './notifications.css';
 
 const NotificationIcon = () => {
   const dispatch = useDispatch();
@@ -26,11 +27,11 @@ const NotificationIcon = () => {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="notification-icon relative">
-      <Link to="/notifications" className="relative">
-        <FaBell size={24} className="text-gray-600 hover:text-amber-500 transition-colors" />
+    <div className="notification-icon-container">
+      <Link to="/notifications" className="notification-bell-link">
+        <FaBell size={24} className="notification-bell" />
         {unreadNotifications.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+          <span className="notification-badge">
             {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
           </span>
         )}

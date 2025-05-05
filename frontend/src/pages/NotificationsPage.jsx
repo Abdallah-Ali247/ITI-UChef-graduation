@@ -2,13 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { FaCheckCircle, FaTimesCircle, FaBell, FaUtensils, FaTruck, FaCheck } from 'react-icons/fa';
+import { 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaBell, 
+  FaUtensils, 
+  FaTruck, 
+  FaCheck, 
+  FaRegBell,
+  FaAngleRight
+} from 'react-icons/fa';
 
 import { 
   fetchNotifications, 
   markNotificationAsRead, 
   markAllNotificationsAsRead 
 } from '../store/slices/notificationSlice';
+import './NotificationsPage.css';
 
 const NotificationsPage = () => {
   const dispatch = useDispatch();
@@ -57,10 +67,13 @@ const NotificationsPage = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Notifications</h1>
-        <div className="text-center py-10">
-          <p>Loading notifications...</p>
+      <div className="notifications-container">
+        <div className="notifications-header">
+          <h1 className="notifications-title">Notifications</h1>
+        </div>
+        <div className="notifications-loading">
+          <div className="notifications-loader"></div>
+          <p>Loading your notifications...</p>
         </div>
       </div>
     );
@@ -68,112 +81,124 @@ const NotificationsPage = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Notifications</h1>
-        <div className="text-center py-10">
-          <p className="text-red-500">Error: {error}</p>
+      <div className="notifications-container">
+        <div className="notifications-header">
+          <h1 className="notifications-title">Notifications</h1>
+        </div>
+        <div className="notifications-error">
+          <FaTimesCircle className="notifications-error-icon" />
+          <p>We couldn't load your notifications. Please try again later.</p>
+          <p className="notifications-error-message">{error}</p>
         </div>
       </div>
     );
   }
 
+  const getUnreadCount = () => {
+    return notifications.filter(notification => !notification.is_read).length;
+  };
+
+  const unreadCount = getUnreadCount();
+  
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h1 className="text-2xl font-bold">Notifications</h1>
+    <div className="notifications-container">
+      <div className="notifications-header">
+        <div className="notifications-title-container">
+          <h1 className="notifications-title">Notifications</h1>
+          {unreadCount > 0 && (
+            <span className="notifications-counter">{unreadCount}</span>
+          )}
+        </div>
         
-        {notifications.some(notification => !notification.is_read) && (
+        {unreadCount > 0 && (
           <button
             onClick={handleMarkAllAsRead}
-            className="mt-2 md:mt-0 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
+            className="notifications-mark-all-btn"
           >
-            <FaCheck className="mr-2" /> Mark all as read
+            <FaCheck /> <span>Mark all as read</span>
           </button>
         )}
       </div>
 
-      <div className="mb-6 border-b border-gray-200">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`py-4 px-1 font-medium text-sm border-b-2 ${activeTab === 'all' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setActiveTab('unread')}
-            className={`py-4 px-1 font-medium text-sm border-b-2 ${activeTab === 'unread' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-          >
-            Unread
-          </button>
-          <button
-            onClick={() => setActiveTab('read')}
-            className={`py-4 px-1 font-medium text-sm border-b-2 ${activeTab === 'read' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
-          >
-            Read
-          </button>
-        </nav>
+      <div className="notifications-tabs">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`notifications-tab ${activeTab === 'all' ? 'active' : ''}`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setActiveTab('unread')}
+          className={`notifications-tab ${activeTab === 'unread' ? 'active' : ''}`}
+        >
+          Unread
+          {unreadCount > 0 && <span className="notifications-tab-counter">{unreadCount}</span>}
+        </button>
+        <button
+          onClick={() => setActiveTab('read')}
+          className={`notifications-tab ${activeTab === 'read' ? 'active' : ''}`}
+        >
+          Read
+        </button>
       </div>
 
       {filteredNotifications.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">No notifications found</p>
+        <div className="notifications-empty">
+          <FaRegBell className="notifications-empty-icon" />
+          <h3>No {activeTab} notifications</h3>
+          <p>Check back later for updates on your orders and activities</p>
         </div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {filteredNotifications.map((notification) => (
-              <li key={notification.id} className={notification.is_read ? 'bg-white' : 'bg-blue-50'}>
-                <Link 
-                  to={notification.order ? `/orders/${notification.order}` : '#'}
-                  className="block hover:bg-gray-50"
-                  onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
-                >
-                  <div className="px-4 py-4 sm:px-6">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 p-2">
-                        {getNotificationIcon(notification.notification_type)}
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex justify-between">
-                          <p className="text-sm font-medium text-blue-600 truncate">
-                            {notification.title}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                          </p>
-                        </div>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {notification.message}
-                        </p>
-                        {notification.order && (
-                          <div className="mt-2">
-                            <span className="px-2 py-1 text-xs font-semibold rounded-md bg-blue-100 text-blue-800">
-                              Order #{notification.order}
-                            </span>
-                          </div>
-                        )}
-                        {!notification.is_read && (
-                          <div className="mt-2">
-                            <button 
-                              className="text-xs text-blue-600 hover:text-blue-800"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleMarkAsRead(notification.id);
-                              }}
-                            >
-                              Mark as read
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+        <div className="notifications-list">
+          {filteredNotifications.map((notification) => (
+            <div key={notification.id} className={`notification-card ${!notification.is_read ? 'unread' : ''}`}>
+              <Link 
+                to={notification.order ? `/orders/${notification.order}` : '#'}
+                className="notification-link"
+                onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+              >
+                <div className="notification-icon-wrapper">
+                  {getNotificationIcon(notification.notification_type)}
+                </div>
+                
+                <div className="notification-content">
+                  <div className="notification-header">
+                    <h3 className="notification-title">{notification.title}</h3>
+                    <span className="notification-time">
+                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                    </span>
                   </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  
+                  <p className="notification-message">{notification.message}</p>
+                  
+                  <div className="notification-footer">
+                    {notification.order && (
+                      <span className="notification-order-badge">
+                        Order #{notification.order}
+                      </span>
+                    )}
+                    
+                    {!notification.is_read && (
+                      <button 
+                        className="notification-mark-read-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleMarkAsRead(notification.id);
+                        }}
+                      >
+                        Mark as read
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="notification-arrow">
+                  <FaAngleRight />
+                </div>
+              </Link>
+            </div>
+          ))}
         </div>
       )}
     </div>
