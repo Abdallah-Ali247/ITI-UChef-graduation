@@ -443,7 +443,7 @@ const Home = () => {
       </section>
 
       {/* Custom Meals Section */}
-      <section className="custom-meals animate-fade-in" style={{ padding: '4rem 2rem', backgroundColor: 'var(--bg-color)', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* <section className="custom-meals animate-fade-in" style={{ padding: '4rem 2rem', backgroundColor: 'var(--bg-color)', maxWidth: '1200px', margin: '0 auto' }}>
         <h2 className="section-title animate-slide-in-right" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--text-color-primary)', fontSize: '2.4rem' }}>Your Custom Meals</h2>
         
         {loadingCustomMeals ? (
@@ -491,7 +491,7 @@ const Home = () => {
             Create New Custom Meal
           </Link>
         </div>
-      </section>
+      </section> */}
 
       {/* Weather-based Recommendation Section */}
       <WeatherRecommendation />
@@ -553,9 +553,9 @@ const Home = () => {
                             <p className="card-text">
                               A custom meal with {meal.ingredients?.length || 'various'} ingredients from {meal.restaurant_name || 'one of our restaurants'}.
                             </p>
-                            <div className="price-tag">
+                            {/* <div className="price-tag">
                               <FaDollarSign /> {typeof meal.total_price === 'number' ? meal.total_price.toFixed(2) : meal.total_price || '12.99'}
-                            </div>
+                            </div> */}
                           </div>
                           <div className="card-footer">
                             <Link to={`/meals/custom/${meal.id}`} className="btn btn-primary">
