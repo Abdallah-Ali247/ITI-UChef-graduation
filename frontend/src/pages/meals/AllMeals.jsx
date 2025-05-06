@@ -16,7 +16,7 @@ const AllMeals = () => {
   const { meals, loading, error, categories } = useSelector(state => state.meals);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [filteredMeals, setFilteredMeals] = useState([]);
   const [availabilityMap, setAvailabilityMap] = useState({});
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -58,7 +58,7 @@ const AllMeals = () => {
   }, [meals, searchTerm, selectedCategory, priceRange]);
 
   const minPrice = Math.min(...meals.map(m => m.base_price), 0);
-  const maxPrice = Math.max(...meals.map(m => m.base_price), 1000);
+  const maxPrice = Math.max(...meals.map(m => m.base_price), 10000);
 
   return (
     <div className="all-meals-page section animate-fade-in">
@@ -127,7 +127,7 @@ const AllMeals = () => {
                   value={priceRange[0]}
                   onChange={e => setPriceRange([+e.target.value, priceRange[1]])}
                   className="form-control"
-                  style={{ width: '80px' }}
+                  style={{ width: '90px' }}
                 />
               </div>
               <span>to</span>
@@ -142,7 +142,7 @@ const AllMeals = () => {
                   value={priceRange[1]}
                   onChange={e => setPriceRange([priceRange[0], +e.target.value])}
                   className="form-control"
-                  style={{ width: '80px' }}
+                  style={{ width: '90px' }}
                 />
               </div>
             </div>

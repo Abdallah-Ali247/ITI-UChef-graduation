@@ -182,7 +182,7 @@ const RestaurantDetail = () => {
             Mix and match ingredients to create your perfect dish!
           </p>
           
-          <h3>Available Ingredients</h3>
+          <h3 style={{margin: '3rem'}}>Available Ingredients</h3>
           {ingredients.length === 0 ? (
             <div className="no-results" style={{ textAlign: 'center', padding: '2rem' }}>
               <p>No ingredients available for custom meals.</p>

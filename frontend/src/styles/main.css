@@ -585,3 +585,10 @@ img {
   color: red !important;
 }
 
+.nav-item{
+  padding: 0 !important;
+}
+
+.nav-link a::after{
+  width: 80% !important;
+}

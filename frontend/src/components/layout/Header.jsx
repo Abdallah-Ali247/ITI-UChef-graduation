@@ -103,12 +103,7 @@ const Header = () => {
               <NavLink to="/top-custom-meals" className="nav-link">Top Custom Meals</NavLink>
             </li>
             
-            {/* Customer-specific navigation items */}
-            {isAuthenticated && user?.user_type === 'customer' && (
-              <li className="nav-item">
-                <NavLink to="/orders" className="nav-link orders-link">My Orders</NavLink>
-              </li>
-            )}
+            
             
             <li className="nav-item cart-item">
               <NavLink to="/cart" className="nav-link cart-link">
@@ -178,9 +173,19 @@ const Header = () => {
                   {isAuthenticated ? (
                     <>
                       <Link to="/profile" className="user-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                      
                         <FaUserCircle className="dropdown-icon" />
-                        <span>Profile</span>
+                        <li className="nav-item">
+                        <span className="nav-link orders-link">Profile</span>
+                      </li>
                       </Link>
+
+                      {/* Customer-specific navigation items */}
+                      {isAuthenticated && user?.user_type === 'customer' && (
+                        <li className="nav-item">
+                          <NavLink to="/orders" className="nav-link orders-link">My Orders</NavLink>
+                        </li>
+                      )}
                       
                       {/* Show different dashboard links based on user type */}
                       {user?.user_type === 'restaurant' && (

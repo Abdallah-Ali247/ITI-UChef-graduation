@@ -92,3 +92,36 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+
+.nav-item{
+  padding: 0 !important;
+}
+
+.filters{
+  margin-bottom: 4rem !important;
+}
+
+.category-section .grid{
+  margin-top: 3rem;
+}
+
+.grid::before{
+  width: 100% !important;
+  left: 0 !important;
+}
+
+.bc{
+  padding: 5px 8px !important;
+}
+
+.nav-link.active::after{
+  transition: all 0.5s ease-in-out;
+}
+.nav-link.active:hover::after{
+  width: 90%;
+}
+
+.nav-menu .nav-item{
+  margin-left: 0 !important;
+}

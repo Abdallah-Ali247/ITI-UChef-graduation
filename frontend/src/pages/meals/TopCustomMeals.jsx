@@ -275,12 +275,12 @@ const TopCustomMeals = () => {
                 </p>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                  <Link to={`/meals/custom/${meal.id}`} className="btn btn-outline">
+                  <Link to={`/meals/custom/${meal.id}`} className="btn btn-outline bc">
                     View Details
                   </Link>
                   <button 
                     onClick={() => handleAddToCart(meal)} 
-                    className="btn btn-primary"
+                    className="btn btn-primary bc"
                   >
                     Add to Cart
                   </button>
@@ -294,7 +294,7 @@ const TopCustomMeals = () => {
       <div className="section-cta text-center" data-theme="light" style={{ 
         marginTop: '3rem', 
         padding: '2rem', 
-        background: 'linear-gradient(135deg, #FFD700, #FFC107, #FFD700)', 
+        background: 'linear-gradient(135deg,rgb(228, 187, 154), #FFC107,rgb(122, 108, 77))', 
         borderRadius: 'var(--border-radius)',
         boxShadow: '0 10px 25px rgba(255, 215, 0, 0.2)',
       }}>
