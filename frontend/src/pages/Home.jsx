@@ -4,14 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchRestaurants } from '../store/slices/restaurantSlice';
 import { fetchMeals } from '../store/slices/mealSlice';
 import axios from 'axios';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+import { Carousel, Container, Row, Col } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaStar, FaUtensils, FaDollarSign, FaAngleRight, FaTags, FaStore, FaHeart, FaTag, FaDice, FaShoppingCart } from 'react-icons/fa';
-import { FaPizzaSlice, FaShippingFast  } from "react-icons/fa";
+import { FaPizzaSlice, FaShippingFast, FaHamburger, FaCheese, FaCarrot, FaWineGlassAlt, FaIceCream, FaAppleAlt, FaEgg, FaCoffee, FaBreadSlice } from "react-icons/fa";
 import { toast } from 'react-toastify';
 import WeatherRecommendation from '../components/WeatherRecommendation';
 import '../styles/weather.css';
+import '../styles/feature-cards.css';
+import '../styles/custom-meals.css';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -30,22 +31,73 @@ const Home = () => {
   
   // Function to get accent class based on index
   const getAccentClass = (index) => accentClasses[index % accentClasses.length];
+  
+  // Function to format price with proper currency display
+  const formatPrice = (meal) => {
+    // First check if we have a calculated price from ingredients (like in CustomMealDetail)
+    if (typeof meal.calculatedPrice === 'number') {
+      return meal.calculatedPrice.toFixed(2);
+    }
+    // If no calculated price, try other price properties
+    else if (typeof meal.total_price === 'number') {
+      return meal.total_price.toFixed(2);
+    } else if (typeof meal.price === 'number') {
+      return meal.price.toFixed(2);
+    } else if (typeof meal.base_price === 'number') {
+      return meal.base_price.toFixed(2);
+    } else {
+      // If no numeric price is found, return a reasonable default
+      return '0.00';
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchRestaurants());
     dispatch(fetchMeals({ isPublic: true }));
     
-    // Fetch top custom meals
+    // Fetch top custom meals with ingredients to calculate real price
     const fetchTopCustomMeals = async () => {
       try {
         setLoadingCustomMeals(true);
+        // First get the top rated custom meals
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/custom-meals/top-rated/`
         );
         
         // Make sure we're dealing with an array
         const data = Array.isArray(response.data) ? response.data : [];
-        setTopCustomMeals(data);
+        
+        // For each meal, fetch its ingredients to calculate the real price
+        const mealsWithPrices = await Promise.all(
+          data.map(async (meal) => {
+            try {
+              // Fetch ingredients for this custom meal
+              const ingredientsResponse = await axios.get(
+                `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/meals/custom-meals/${meal.id}/ingredients/`
+              );
+              
+              // Get the ingredients array
+              const mealIngredients = ingredientsResponse.data;
+              
+              // Calculate total price based on ingredients exactly like in CustomMealDetail
+              const calculatedPrice = mealIngredients.reduce((sum, item) => {
+                return sum + (item.ingredient_details.price_per_unit * item.quantity);
+              }, 0);
+              
+              // Return the meal with the calculated price
+              return {
+                ...meal,
+                ingredients: mealIngredients,
+                calculatedPrice: calculatedPrice
+              };
+            } catch (error) {
+              console.error(`Error fetching ingredients for meal ${meal.id}:`, error);
+              return meal; // Return original meal if ingredients fetch fails
+            }
+          })
+        );
+        
+        setTopCustomMeals(mealsWithPrices);
       } catch (error) {
         console.error('Error fetching top custom meals:', error);
         setTopCustomMeals([]);
@@ -117,32 +169,62 @@ const Home = () => {
   // Get featured restaurants (first 6)
   const featuredRestaurants = restaurants.slice(0, 6);
   
-  // Slider settings
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-        }
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
+  // Custom CSS for the carousel
+  const carouselStyles = {
+    container: {
+      maxWidth: '800px',
+      margin: '0 auto',
+      padding: '0 15px',
+      overflow: 'hidden',
+      position: 'relative',
+    },
+    item: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '10px',
+    },
+    card: {
+      width: '100%',
+      maxWidth: '450px',
+      margin: '0 auto',
+      height: '100%',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+      transition: 'transform 0.3s ease',
+    },
   };
+
+  useEffect(() => {
+    // Add custom styles to make the carousel look better
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .carousel-control-prev, .carousel-control-next {
+        width: 10%;
+        opacity: 0.8;
+      }
+      .carousel-indicators {
+        bottom: -10px;
+      }
+      .carousel-indicators button {
+        background-color: var(--primary-color);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin: 0 5px;
+      }
+      .carousel-inner {
+        padding-bottom: 30px;
+      }
+      .carousel-item {
+        transition: transform 0.6s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   return (
     <div className="home-container animate-fade-in">
@@ -176,24 +258,73 @@ const Home = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="how-it-works animate-fade-in" style={{ padding: '4rem 2rem', backgroundColor: 'var(--bg-color-secondary)', borderRadius: '10px', margin: '2rem auto', maxWidth: '1200px' }}>
-        <h2 className="section-title animate-slide-in-left" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--text-color-primary)', fontSize: '2.4rem' }}>How It Works</h2>
-        <div className="steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
-          <div className="step animate-slide-in-bottom stagger-delay-1" style={{ textAlign: 'center', padding: '2rem', backgroundColor: 'var(--card-bg)', borderRadius: '10px', boxShadow: 'var(--card-shadow)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem', color: 'var(--accent-color-primary)' }}><FaUtensils /></div>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', color: 'var(--text-color-primary)' }}>Choose Your Ingredients</h3>
-            <p style={{ color: 'var(--text-color-secondary)' }}>Browse through our extensive catalog of high-quality ingredients.</p>
+      <section className="how-it-works animate-fade-in" style={{ 
+        padding: '5rem 2rem', 
+        backgroundColor: 'var(--bg-color-secondary)', 
+        borderRadius: '16px', 
+        margin: '3rem auto', 
+        maxWidth: '1200px',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto 4rem', textAlign: 'center' }}>
+          <h2 className="section-title animate-slide-in-left" style={{ 
+            textAlign: 'center', 
+            marginBottom: '1.5rem', 
+            color: 'var(--text-color)', 
+            fontSize: '2.6rem',
+            fontWeight: '700',
+            letterSpacing: '-0.02em'
+          }}>How It Works</h2>
+          <p style={{ 
+            fontSize: '1.1rem', 
+            color: 'var(--text-color-secondary)', 
+            lineHeight: '1.7',
+            maxWidth: '650px',
+            margin: '0 auto'
+          }}>
+            Our simple three-step process makes creating your perfect meal easier than ever before.
+          </p>
+        </div>
+        
+        <div className="features-container">
+          <div className="feature-card feature-card-1 animate-slide-in-bottom stagger-delay-1">
+            <div className="feature-icon-container">
+              <FaUtensils className="feature-icon" />
+            </div>
+            <div className="feature-card-content">
+              <h3>Choose Your Ingredients</h3>
+              <p>Browse through our extensive catalog of high-quality ingredients.</p>
+            </div>
           </div>
-          <div className="step animate-slide-in-bottom stagger-delay-2" style={{ textAlign: 'center', padding: '2rem', backgroundColor: 'var(--card-bg)', borderRadius: '10px', boxShadow: 'var(--card-shadow)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem', color: 'var(--accent-color-secondary)' }}><FaPizzaSlice /></div>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', color: 'var(--text-color-primary)' }}>Customize Your Meal</h3>
-            <p style={{ color: 'var(--text-color-secondary)' }}>Personalize portion sizes and ingredient combinations.</p>
+          <div className="feature-card feature-card-2 animate-slide-in-bottom stagger-delay-2">
+            <div className="feature-icon-container">
+              <FaPizzaSlice className="feature-icon" />
+            </div>
+            <div className="feature-card-content">
+              <h3>Customize Your Meal</h3>
+              <p>Personalize portion sizes and ingredient combinations.</p>
+            </div>
           </div>
-          <div className="step animate-slide-in-bottom stagger-delay-3" style={{ textAlign: 'center', padding: '2rem', backgroundColor: 'var(--card-bg)', borderRadius: '10px', boxShadow: 'var(--card-shadow)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem', color: 'var(--accent-color-tertiary)' }}><FaShippingFast /></div>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', color: 'var(--text-color-primary)' }}>Enjoy Delivery</h3>
-            <p style={{ color: 'var(--text-color-secondary)' }}>Get your perfect meal delivered right to your doorstep.</p>
+          <div className="feature-card feature-card-3 animate-slide-in-bottom stagger-delay-3">
+            <div className="feature-icon-container">
+              <FaShippingFast className="feature-icon" />
+            </div>
+            <div className="feature-card-content">
+              <h3>Enjoy Delivery</h3>
+              <p>Get your perfect meal delivered right to your doorstep.</p>
+            </div>
           </div>
+        </div>
+        
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <Link to="/meals" className="btn btn-outline" style={{ 
+            padding: '0.85rem 2rem',
+            fontSize: '1.05rem',
+            fontWeight: '600',
+            transition: 'all 0.3s ease'
+          }}>
+            Start Creating Your Meal
+          </Link>
         </div>
       </section>
 
@@ -368,7 +499,7 @@ const Home = () => {
                   <span style={{ display: 'block', fontSize: '4rem', marginBottom: '1rem' }}>
                     <FaDice style={{ color: 'var(--dice-color)' }} />
                   </span>
-                  <span>Roll the Dice!</span>
+                  <span style={{ color: 'var(--text-color)' }}>Roll the Dice!</span>
                 </>
               )}
             </button>
@@ -496,94 +627,146 @@ const Home = () => {
       {/* Weather-based Recommendation Section */}
       <WeatherRecommendation />
       
-      {/* Featured Custom Meals Section with pattern background */}
-      <section className="section-accent pattern-bg">
-        <div className="container">
-          <h2 className="section-title">Top Rated Custom Creations</h2>
+      {/* Top Rated Custom Meals Section */}
+      <section className="custom-meals-section animate-fade-in">
+        <div className="section-header">
+          <h2 className="section-title animate-slide-in-right">Top Rated Custom Creations</h2>
           <p className="section-subtitle">Discover unique meals created by our community</p>
-          
-          {loadingCustomMeals ? (
-            <div className="loading">
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <div className="slider-container" style={{ margin: '0 -15px' }}>
-              {topCustomMeals.length > 0 ? (
-                <Slider {...sliderSettings}>
-                  {topCustomMeals.map((meal, index) => {
-                    // Use the function to get the accent class instead of the hook
-                    const accentClass = getAccentClass(index + 4); // Offset for variety
-                    return (
-                      <div key={meal.id} style={{ padding: '0 15px' }}>
-                        <div className={`card ${accentClass}`}>
-                          <div className="card-img" style={{ 
-                            height: '220px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            backgroundColor: 'var(--bg-accent)',
-                            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e94e37\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
-                          }}>
-                            <div style={{ 
-                              width: '120px', 
-                              height: '120px', 
-                              borderRadius: '50%', 
-                              backgroundColor: 'var(--primary-color)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '2.5rem',
-                              boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
-                            }}>
-                              <FaUtensils />
-                            </div>
-                          </div>
-                          <div className="card-body">
-                            <div className="tags-container">
-                              <span className="tag tag-accent">
-                                <FaHeart style={{ marginRight: '0.3rem' }} /> Community Creation
-                              </span>
-                            </div>
-                            <h3 className="card-title">{meal.name}</h3>
-                            <div className="rating">
-                              <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
-                              <span className="rating-text">5.0 ({meal.votes || 5} votes)</span>
-                            </div>
-                            <p className="card-text">
-                              A custom meal with {meal.ingredients?.length || 'various'} ingredients from {meal.restaurant_name || 'one of our restaurants'}.
-                            </p>
-                            {/* <div className="price-tag">
-                              <FaDollarSign /> {typeof meal.total_price === 'number' ? meal.total_price.toFixed(2) : meal.total_price || '12.99'}
-                            </div> */}
-                          </div>
-                          <div className="card-footer">
-                            <Link to={`/meals/custom/${meal.id}`} className="btn btn-primary">
-                              View Details <FaAngleRight style={{ marginLeft: '0.3rem' }} />
-                            </Link>
+        </div>
+        
+        {loadingCustomMeals ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+            <div style={{ 
+              width: '60px', 
+              height: '60px', 
+              borderRadius: '50%', 
+              border: '3px solid var(--border-color)', 
+              borderTopColor: 'var(--primary-color)',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+          </div>
+        ) : (
+          <div className="custom-meals-carousel">
+            {topCustomMeals.length > 0 ? (
+              <Carousel 
+                indicators={true}
+                controls={true}
+                interval={4000}
+                className="custom-carousel"
+                pause="hover"
+              >
+                {topCustomMeals.map((meal, index) => {
+                  // Array of food icons to use randomly
+                  const foodIcons = [
+                    <FaUtensils key="utensils" />,
+                    <FaPizzaSlice key="pizza" />,
+                    <FaHamburger key="burger" />,
+                    <FaCheese key="cheese" />,
+                    <FaCarrot key="carrot" />,
+                    <FaWineGlassAlt key="wine" />,
+                    <FaIceCream key="icecream" />,
+                    <FaAppleAlt key="apple" />,
+                    <FaBreadSlice key="bread" />,
+                    <FaCoffee key="coffee" />
+                  ];
+                  
+                  // Select an icon based on the meal index
+                  const foodIcon = foodIcons[index % foodIcons.length];
+                  
+                  return (
+                    <Carousel.Item key={meal.id || index}>
+                      <div className="custom-meal-card">
+                        <div className="custom-meal-img-container">
+                          <div className="custom-meal-img-pattern" style={{
+                            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e94e37\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+                          }}></div>
+                          <div className="custom-meal-icon-wrapper">
+                            {foodIcon}
                           </div>
                         </div>
+                        
+                        <div className="custom-meal-content">
+                          <div className="custom-meal-tags">
+                            <span className="custom-meal-tag">
+                              <FaHeart style={{ marginRight: '0.5rem' }} /> Community Creation
+                            </span>
+                            {meal.category && (
+                              <span className="custom-meal-tag">
+                                <FaTag style={{ marginRight: '0.5rem' }} /> {meal.category}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <h3 className="custom-meal-title">{meal.name || `Custom Creation #${index + 1}`}</h3>
+                          
+                          <div className="custom-meal-rating">
+                            <div className="rating-stars">
+                              <FaStar /><FaStar /><FaStar /><FaStar /><FaStar />
+                            </div>
+                            <span>5.0 ({meal.votes || 5} votes)</span>
+                          </div>
+                          
+                          <p className="custom-meal-description">
+                            A delicious custom meal with {meal.ingredients?.length || 'various'} ingredients from {meal.restaurant_name || 'one of our premium restaurants'}.
+                          </p>
+                          
+                          <div className="custom-meal-icons">
+                            <div className="custom-meal-icon custom-meal-icon-1">
+                              <FaUtensils />
+                            </div>
+                            <div className="custom-meal-icon custom-meal-icon-2">
+                              {index % 2 === 0 ? <FaPizzaSlice /> : <FaHamburger />}
+                            </div>
+                            <div className="custom-meal-icon custom-meal-icon-3">
+                              {index % 3 === 0 ? <FaCarrot /> : index % 3 === 1 ? <FaCheese /> : <FaWineGlassAlt />}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="custom-meal-footer">
+                          <div className="custom-meal-price">
+                            <FaDollarSign /> {formatPrice(meal)}
+                          </div>
+                          <Link to={`/meals/custom/${meal.id}`} className="custom-meal-button">
+                            View Details <FaAngleRight />
+                          </Link>
+                        </div>
                       </div>
-                    );
-                  })}
-                </Slider>
-              ) : (
-                <div className="info-box info-box-accent" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                  <h4 className="info-box-title">No Custom Meals Yet</h4>
-                  <p>Be the first to create a custom meal and share it with the community!</p>
-                  <div style={{ marginTop: '1rem' }}>
-                    <Link to="/restaurants" className="btn btn-accent">Create Your Own Meal</Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <Link to="/top-custom-meals" className="btn btn-accent">
-              View All Custom Meals
-            </Link>
+                    </Carousel.Item>
+                  );
+                })}
+              </Carousel>
+            ) : (
+              <div style={{ 
+                maxWidth: '600px', 
+                margin: '0 auto', 
+                padding: '2rem', 
+                borderRadius: 'var(--border-radius)', 
+                backgroundColor: 'rgba(var(--primary-color-rgb), 0.05)', 
+                textAlign: 'center',
+                border: '1px solid rgba(var(--primary-color-rgb), 0.1)'
+              }}>
+                <h4 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-color)' }}>No Custom Meals Yet</h4>
+                <p style={{ marginBottom: '1.5rem', color: 'var(--text-color-secondary)' }}>Be the first to create a custom meal and share it with the community!</p>
+                <Link to="/restaurants" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FaUtensils /> Create Your Own Meal
+                </Link>
+              </div>
+            )}
           </div>
+        )}
+        
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <Link to="/top-custom-meals" className="btn btn-primary" style={{ 
+            padding: '0.85rem 2rem',
+            fontSize: '1.05rem',
+            fontWeight: '600',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <FaHeart /> View All Custom Meals
+          </Link>
         </div>
       </section>
     </div>

@@ -104,31 +104,31 @@ const Cart = () => {
               
               <div style={{ 
                 display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '0.5rem'
+                alignItems: 'center', 
+                gap: '0.5rem',
+                marginBottom: '1rem'
               }}>
-                <div className="quantity-control" style={{ 
+                <div style={{ 
                   display: 'flex', 
-                  alignItems: 'center',
-                  backgroundColor: 'var(--bg-color-tertiary)',
-                  borderRadius: 'var(--border-radius-sm)',
-                  overflow: 'hidden'
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  marginBottom: '1rem'
                 }}>
                   <button 
                     className="quantity-btn"
                     style={{ 
                       width: '36px', 
                       height: '36px', 
-                      border: 'none',
-                      backgroundColor: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-color-secondary)',
+                      color: 'var(--text-color)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '1.2rem',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      borderRadius: 'var(--border-radius-sm)'
                     }}
                     onClick={() => handleQuantityChange(
                       item.type === 'regular' ? item.id : item.customMealId,
@@ -138,37 +138,43 @@ const Cart = () => {
                   >
                     -
                   </button>
-                  <input
-                    type="number"
-                    value={item.quantity}
+                  
+                  <input 
+                    type="number" 
+                    className="quantity-input"
+                    value={item.quantity} 
+                    min="1" 
+                    style={{ 
+                      width: '50px', 
+                      textAlign: 'center',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--border-radius-sm)',
+                      padding: '0.5rem',
+                      backgroundColor: 'var(--bg-color-secondary)',
+                      color: 'var(--text-color)'
+                    }}
                     onChange={(e) => handleQuantityChange(
                       item.type === 'regular' ? item.id : item.customMealId,
                       item.type,
                       parseInt(e.target.value) || 1
                     )}
-                    style={{ 
-                      width: '40px', 
-                      textAlign: 'center', 
-                      border: 'none',
-                      backgroundColor: 'transparent',
-                      padding: '0.25rem',
-                      fontSize: '0.9rem'
-                    }}
-                    min="1"
                   />
+                  
                   <button 
                     className="quantity-btn"
                     style={{ 
                       width: '36px', 
                       height: '36px', 
-                      border: 'none',
-                      backgroundColor: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-color-secondary)',
+                      color: 'var(--text-color)',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '1.2rem',
-                      fontWeight: 'bold'
+                      fontWeight: 'bold',
+                      borderRadius: 'var(--border-radius-sm)'
                     }}
                     onClick={() => handleQuantityChange(
                       item.type === 'regular' ? item.id : item.customMealId,

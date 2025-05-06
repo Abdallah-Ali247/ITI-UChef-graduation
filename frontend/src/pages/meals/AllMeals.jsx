@@ -16,7 +16,7 @@ const AllMeals = () => {
   const { meals, loading, error, categories } = useSelector(state => state.meals);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 100]);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
   const [filteredMeals, setFilteredMeals] = useState([]);
   const [availabilityMap, setAvailabilityMap] = useState({});
   const [checkingAvailability, setCheckingAvailability] = useState(false);
@@ -58,16 +58,26 @@ const AllMeals = () => {
   }, [meals, searchTerm, selectedCategory, priceRange]);
 
   const minPrice = Math.min(...meals.map(m => m.base_price), 0);
-  const maxPrice = Math.max(...meals.map(m => m.base_price), 100);
+  const maxPrice = Math.max(...meals.map(m => m.base_price), 1000);
 
   return (
     <div className="all-meals-page section animate-fade-in">
       <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
         <h1 className="section-title animate-scale-up">Explore Our Meals</h1>
-        <p className="section-subtitle animate-scale-up">Discover a variety of delicious meals prepared by our talented chefs. Use the filters below to find exactly what you're craving.</p>
+        <p className="section-subtitle animate-scale-up" style={{ marginBottom: '2.5rem' }}>Discover a variety of delicious meals prepared by our talented chefs. Use the filters below to find exactly what you're craving.</p>
         
-        <div className="filters animate-slide-in-bottom" style={{ display: 'flex', gap: '1.5rem', marginBottom: '2.5rem', flexWrap: 'wrap', padding: '1.5rem', backgroundColor: 'var(--bg-color-secondary)', borderRadius: 'var(--border-radius)' }}>
+        <div className="filters animate-slide-in-bottom" style={{ 
+          display: 'flex', 
+          gap: '1.5rem', 
+          marginBottom: '4rem', 
+          flexWrap: 'wrap', 
+          padding: '1.5rem', 
+          backgroundColor: 'var(--bg-color-secondary)', 
+          borderRadius: 'var(--border-radius)',
+          alignItems: 'flex-start'
+        }}>
           <div className="form-group" style={{ marginBottom: 0, flex: '1', minWidth: '220px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Search</label>
             <div style={{ position: 'relative' }}>
               <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-color-secondary)' }}>
                 <FaSearch />
@@ -84,6 +94,7 @@ const AllMeals = () => {
           </div>
           
           <div className="form-group" style={{ marginBottom: 0, width: '180px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Category</label>
             <div style={{ position: 'relative' }}>
               <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-color-secondary)' }}>
                 <FaListAlt />
@@ -102,35 +113,38 @@ const AllMeals = () => {
             </div>
           </div>
           
-          <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--text-color-secondary)' }}>
-                <FaDollarSign />
-              </span>
-              <input
-                type="number"
-                min={minPrice}
-                max={maxPrice}
-                value={priceRange[0]}
-                onChange={e => setPriceRange([+e.target.value, priceRange[1]])}
-                className="form-control"
-                style={{ width: '80px' }}
-              />
-            </div>
-            <span>to</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--text-color-secondary)' }}>
-                <FaDollarSign />
-              </span>
-              <input
-                type="number"
-                min={minPrice}
-                max={maxPrice}
-                value={priceRange[1]}
-                onChange={e => setPriceRange([priceRange[0], +e.target.value])}
-                className="form-control"
-                style={{ width: '80px' }}
-              />
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Price Range</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: 'var(--text-color-secondary)' }}>
+                  <FaDollarSign />
+                </span>
+                <input
+                  type="number"
+                  min={minPrice}
+                  max={maxPrice}
+                  value={priceRange[0]}
+                  onChange={e => setPriceRange([+e.target.value, priceRange[1]])}
+                  className="form-control"
+                  style={{ width: '80px' }}
+                />
+              </div>
+              <span>to</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: 'var(--text-color-secondary)' }}>
+                  <FaDollarSign />
+                </span>
+                <input
+                  type="number"
+                  min={minPrice}
+                  max={maxPrice}
+                  value={priceRange[1]}
+                  onChange={e => setPriceRange([priceRange[0], +e.target.value])}
+                  className="form-control"
+                  style={{ width: '80px' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -148,18 +162,32 @@ const AllMeals = () => {
             <p>We couldn't find any meals matching your criteria. Try adjusting your filters.</p>
           </div>
         ) : (
-          <div className="grid">
+          <div className="grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+            gap: '2rem',
+            marginTop: '2rem'
+          }}>
             {filteredMeals.map((meal, index) => {
               const accentClass = getAccentClass(index);
               return (
-                <div key={meal.id} className={`card-container animate-fade-in stagger-delay-${index % 5 + 1}`}>
-                  <div className={`card ${accentClass}`} style={{ opacity: availabilityMap[meal.id] === false ? 0.75 : 1 }}>
+                <div key={meal.id} className={`card-container animate-fade-in stagger-delay-${index % 5 + 1}`} style={{ height: '100%' }}>
+                  <div className={`card ${accentClass}`} style={{ 
+                    opacity: availabilityMap[meal.id] === false ? 0.75 : 1,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderRadius: 'var(--border-radius)',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease'
+                  }}>
                     <img
                       src={meal.image || 'https://via.placeholder.com/300x200?text=Meal'}
                       alt={meal.name}
                       className="card-img"
                     />
-                    <div className="card-body">
+                    <div className="card-body" style={{ flex: '1', padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
                       <div className="tags-container">
                         {meal.category_name && (
                           <span className="tag tag-accent">
@@ -184,7 +212,7 @@ const AllMeals = () => {
                         <FaDollarSign /> {typeof meal.base_price === 'number' ? meal.base_price.toFixed(2) : meal.base_price || '0.00'}
                       </div>
                     </div>
-                    <div className="card-footer">
+                    <div className="card-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-color-tertiary)' }}>
                         <FaUtensils /> {meal.ingredients?.length || 0} ingredients
                       </span>

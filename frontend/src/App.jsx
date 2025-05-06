@@ -33,6 +33,7 @@ import Checkout from './pages/cart/Checkout'
 import OrderHistory from './pages/orders/OrderHistory'
 import OrderDetail from './pages/orders/OrderDetail'
 import Profile from './pages/user/Profile'
+import EditProfile from './pages/user/EditProfile'
 import RestaurantDashboard from './pages/dashboard/RestaurantDashboard'
 import AdminDashboard from './pages/dashboard/AdminDashboard'
 import AdminUserForm from './pages/admin/AdminUserForm'
@@ -118,6 +119,11 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-profile" element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             } />
             <Route path="/notifications" element={

@@ -25,7 +25,7 @@ const RestaurantList = () => {
         <p>Choose from our selection of restaurants and customize your perfect meal.</p>
       </div>
       
-      <div className="search-bar" style={{ marginBottom: '2rem' }}>
+      <div className="search-bar" style={{ marginBottom: '4rem' }}>
         <input 
           type="text" 
           placeholder="Search restaurants..." 

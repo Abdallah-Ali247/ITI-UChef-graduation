@@ -494,11 +494,25 @@
 }
 
 .custom-meal-form {
-  background-color: var(--card-bg, white);
-  border-radius: var(--border-radius, 8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
+  background-color: var(--review-card-bg, white);
+  border-radius: var(--border-radius, 12px);
+  box-shadow: var(--review-shadow, 0 4px 15px rgba(0, 0, 0, 0.05));
+  border: var(--review-border, 1px solid rgba(0, 0, 0, 0.08));
+  padding: 2rem;
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-meal-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary-color);
+  opacity: 0.7;
 }
 
 .custom-meal-form-title {
@@ -527,11 +541,13 @@
 
 .custom-meal-form-control {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color, #eee);
-  border-radius: var(--border-radius-sm, 4px);
-  background-color: var(--bg-color, #fff);
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--form-border, rgba(0, 0, 0, 0.1));
+  border-radius: var(--border-radius, 8px);
+  background-color: var(--form-bg, #fff);
   color: var(--text-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .custom-meal-form-control:focus {
@@ -540,8 +556,18 @@
 }
 
 .custom-meal-form-textarea {
-  min-height: 100px;
+  min-height: 120px;
   resize: vertical;
+  line-height: 1.6;
+  /* Remove the cross lines in dark mode by using transparent background lines */
+  background-image: linear-gradient(transparent, transparent 1.5rem, rgba(0, 0, 0, 0.05) 1.5rem, rgba(0, 0, 0, 0.05) 1.5rem, transparent 1.6rem);
+  background-size: 100% 1.6rem;
+  line-height: 1.6rem;
+}
+
+/* Fix for dark mode - ensure no cross lines */
+[data-theme="dark"] .custom-meal-form-textarea {
+  background-image: linear-gradient(transparent, transparent 1.5rem, rgba(255, 255, 255, 0.05) 1.5rem, rgba(255, 255, 255, 0.05) 1.5rem, transparent 1.6rem);
 }
 
 .custom-meal-form-checkbox {

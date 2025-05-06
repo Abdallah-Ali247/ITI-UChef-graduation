@@ -5,6 +5,18 @@
   padding: 5px;
 }
 
+.position-relative {
+  position: relative;
+}
+
+.notification-dropdown-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  z-index: 50;
+}
+
 .notification-bell-link {
   display: flex;
   position: relative;
@@ -53,15 +65,13 @@
 
 /* Notification List Styles */
 .notification-dropdown {
-  position: absolute;
-  right: 0;
+  position: relative;
   margin-top: 8px;
   width: 320px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  z-index: 50;
   max-height: 480px;
   overflow-y: auto;
   animation: slideDown 0.3s ease-out;
@@ -268,6 +278,49 @@
 .notification-close-btn:focus {
   outline: 2px solid #3b82f6; /* blue-500 */
   outline-offset: 2px;
+}
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+  .notification-dropdown-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+    z-index: 1000;
+  }
+  
+  .notification-dropdown {
+    position: relative;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.3s ease-out;
+    margin-top: 0;
+    max-height: 80vh;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .notification-header {
+    text-align: center;
+    padding: 1.2rem;
+  }
+  
+  .notification-item {
+    padding: 1rem;
+  }
 }
 
 /* Dark mode support for future use */

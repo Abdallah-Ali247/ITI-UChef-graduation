@@ -6,7 +6,6 @@ import { fetchUserOrders } from '../../store/slices/orderSlice';
 import { fetchCustomMeals } from '../../store/slices/mealSlice';
 import { addToCart } from '../../store/slices/cartSlice';
 import { validateField, validateForm, isFormValid } from '../../utils/validation';
-import ReactDOM from 'react-dom';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -168,35 +167,10 @@ const Profile = () => {
         phone_number: user.phone_number || '',
         address: user.address || '',
         bio: user.profile?.bio || '',
-        favorite_cuisine: user.profile?.favorite_cuisine || '',
-        password: '',
-        password2: '',
-        current_password: ''
+        favorite_cuisine: user.profile?.favorite_cuisine || ''
       });
     }
   }, [user]);
-
-  // This useEffect will log when the modal state changes
-  useEffect(() => {
-    console.log('Modal state changed:', showEditModal);
-    
-    // Prevent body scrolling when modal is open
-    if (showEditModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showEditModal]);
-  
-  const handleEditProfileClick = () => {
-    console.log('Edit Profile button clicked');
-    // Instead of showing a modal, navigate to a dedicated edit profile page
-    navigate('/edit-profile');
-  };
   
   const handleProfileFormChange = (e) => {
     const { name, value } = e.target;
@@ -470,10 +444,208 @@ const Profile = () => {
                 <button 
                   className="btn btn-primary" 
                   style={{ marginTop: '1rem' }}
-                  onClick={handleEditProfileClick}
+                  onClick={() => setShowEditModal(true)}
                 >
                   Edit Profile
                 </button>
+              </div>
+            </div>
+            
+          </div>
+        )}
+        
+        {/* Edit Profile Modal - Moved outside the card for better rendering */}
+        {showEditModal && (
+          <div className="modal-overlay" style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+          }}>
+            <h2>Edit Profile</h2>
+            
+            {profileUpdateError && (
+              <div className="alert alert-danger">
+                {profileUpdateError}
+                        </div>
+                      )}
+                      
+                      <form onSubmit={handleProfileSubmit}>
+                        <div className="form-group">
+                          <label htmlFor="first_name" className="form-label">First Name</label>
+                          <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            value={profileForm.first_name}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.first_name ? 'is-invalid' : ''}`}
+                            required
+                          />
+                          {formErrors.first_name && (
+                            <div className="invalid-feedback">
+                              {formErrors.first_name}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="last_name" className="form-label">Last Name</label>
+                          <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            value={profileForm.last_name}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.last_name ? 'is-invalid' : ''}`}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="email" className="form-label">Email</label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={profileForm.email}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.email ? 'is-invalid' : ''}`}
+                            required
+                          />
+                          {formErrors.email && (
+                            <div className="invalid-feedback">
+                              {formErrors.email}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="phone_number" className="form-label">Phone Number</label>
+                          <input
+                            type="tel"
+                            id="phone_number"
+                            name="phone_number"
+                            value={profileForm.phone_number}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.phone_number ? 'is-invalid' : ''}`}
+                            placeholder="+1234567890"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="address" className="form-label">Address</label>
+                          <textarea
+                            id="address"
+                            name="address"
+                            value={profileForm.address}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            rows="3"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="bio" className="form-label">Bio</label>
+                          <textarea
+                            id="bio"
+                            name="bio"
+                            value={profileForm.bio}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            rows="3"
+                            placeholder="Tell us about yourself"
+                          ></textarea>
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="favorite_cuisine" className="form-label">Favorite Cuisine</label>
+                          <input
+                            type="text"
+                            id="favorite_cuisine"
+                            name="favorite_cuisine"
+                            value={profileForm.favorite_cuisine}
+                            onChange={handleProfileFormChange}
+                            className="form-control"
+                            placeholder="e.g., Italian, Japanese, Mexican"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="current_password" className="form-label">Current Password</label>
+                          <input
+                            type="password"
+                            id="current_password"
+                            name="current_password"
+                            value={profileForm.current_password}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.current_password ? 'is-invalid' : ''}`}
+                          />
+                          {formErrors.current_password && (
+                            <div className="invalid-feedback">
+                              {formErrors.current_password}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="password" className="form-label">New Password</label>
+                          <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value={profileForm.password}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.password ? 'is-invalid' : ''}`}
+                          />
+                          {formErrors.password && (
+                            <div className="invalid-feedback">
+                              {formErrors.password}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="password2" className="form-label">Confirm New Password</label>
+                          <input
+                            type="password"
+                            id="password2"
+                            name="password2"
+                            value={profileForm.password2}
+                            onChange={handleProfileFormChange}
+                            className={`form-control ${formErrors.password2 ? 'is-invalid' : ''}`}
+                          />
+                          {formErrors.password2 && (
+                            <div className="invalid-feedback">
+                              {formErrors.password2}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                          <button 
+                            type="button" 
+                            className="btn btn-outline" 
+                            onClick={() => setShowEditModal(false)}
+                            disabled={profileUpdateLoading}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={profileUpdateLoading}
+                          >
+                            {profileUpdateLoading ? 'Saving...' : 'Save Changes'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
