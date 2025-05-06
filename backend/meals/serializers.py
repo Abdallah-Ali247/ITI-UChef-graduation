@@ -7,8 +7,7 @@ class MealCategorySerializer(serializers.ModelSerializer):
         model = MealCategory
         fields = ['id', 'name', 'description']
         read_only_fields = ['id']
-        
-    
+
 class MealIngredientSerializer(serializers.ModelSerializer):
     ingredient_details = IngredientSerializer(source='ingredient', read_only=True)
     
@@ -36,8 +35,7 @@ class CustomMealIngredientSerializer(serializers.ModelSerializer):
         model = CustomMealIngredient
         fields = ['id', 'ingredient', 'ingredient_details', 'quantity']
         read_only_fields = ['id']
-        
-        
+
 class CustomMealSerializer(serializers.ModelSerializer):
     ingredients = CustomMealIngredientSerializer(many=True, read_only=True)
     base_meal_details = MealSerializer(source='base_meal', read_only=True)
@@ -60,3 +58,5 @@ class CustomMealSerializer(serializers.ModelSerializer):
             CustomMealIngredient.objects.create(custom_meal=custom_meal, **ingredient_data)
         
         return custom_meal
+
+
