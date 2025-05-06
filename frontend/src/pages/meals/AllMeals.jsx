@@ -214,7 +214,7 @@ const AllMeals = () => {
                     </div>
                     <div className="card-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-color-tertiary)' }}>
-                        <FaUtensils /> {meal.ingredients?.length || 0} ingredients
+                        <FaUtensils /> {meal.ingredients?.length || ''} 
                       </span>
                       <Link to={`/meals/${meal.id}`} className="btn btn-primary">View Details</Link>
                     </div>
