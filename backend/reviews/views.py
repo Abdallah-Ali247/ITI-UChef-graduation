@@ -34,14 +34,14 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    
+
 class MealReviewViewSet(viewsets.ModelViewSet):
     queryset = MealReview.objects.all()
     serializer_class = MealReviewSerializer
     permission_classes = [IsAuthenticated, IsReviewOwnerOrReadOnly]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at', 'rating']
-
+    
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
@@ -51,7 +51,7 @@ class MealReviewViewSet(viewsets.ModelViewSet):
         meal_id = self.request.query_params.get('meal', None)
         if meal_id:
             return MealReview.objects.filter(meal_id=meal_id)
-        return MealReview.objects.all()   
+        return MealReview.objects.all()
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
