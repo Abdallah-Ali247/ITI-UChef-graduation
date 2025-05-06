@@ -4,8 +4,8 @@
   padding: 5rem 2rem;
   background-color: var(--bg-color);
   border-radius: 16px;
-  margin: 3rem auto;
-  max-width: 1200px;
+  margin: 0rem auto;
+  max-width: 1000px;
   position: relative;
   overflow: hidden;
 }
@@ -56,7 +56,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--primary-color);
+  background-color: var(--accent);
   opacity: 0.8;
   top: 50%;
   transform: translateY(-50%);
@@ -66,7 +66,7 @@
 .custom-meals-carousel .carousel-control-prev:hover,
 .custom-meals-carousel .carousel-control-next:hover {
   opacity: 1;
-  background-color: var(--primary-color);
+  background-color: var(--accent);
 }
 
 .custom-meals-carousel .carousel-control-prev-icon,
@@ -83,7 +83,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   opacity: 0.5;
   margin: 0 5px;
 }
@@ -128,10 +128,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color-tertiary));
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-color-tertiary));
   color: white;
   font-size: 3rem;
-  box-shadow: 0 8px 20px rgba(var(--primary-color-rgb), 0.3);
+  box-shadow: 0 8px 20px rgba(var(--accent-color-rgb), 0.3);
   z-index: 1;
 }
 
@@ -179,7 +179,7 @@
   border-radius: 50px;
   font-size: 0.8rem;
   font-weight: 600;
-  background-color: rgba(var(--primary-color-rgb), 0.1);
+  background-color: rgba(var(--accent-color-rgb), 0.1);
   color: var(--primary-color);
 }
 
@@ -213,7 +213,7 @@
 
 .custom-meal-footer {
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid rgba(var(--primary-color-rgb), 0.08);
+  border-top: 1px solid rgba(var(--accent-color-rgb), 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -233,7 +233,7 @@
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
   border-radius: var(--border-radius);
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   color: white;
   font-weight: 600;
   text-decoration: none;

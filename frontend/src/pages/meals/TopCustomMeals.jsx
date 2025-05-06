@@ -225,7 +225,7 @@ const TopCustomMeals = () => {
                 position: 'absolute',
                 top: '10px',
                 left: '10px',
-                backgroundColor: 'var(--primary-color)',
+                backgroundColor: 'var(--accent-color)',
                 color: 'white',
                 borderRadius: '50%',
                 width: '32px',
@@ -245,8 +245,8 @@ const TopCustomMeals = () => {
                   className="card-img"
                 />
               ) : (
-                <div className="custom-meal-img-container" style={{ height: '220px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, var(--bg-accent), var(--bg-accent-secondary))' }}>
-                  <div className="custom-meal-icon-wrapper" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--primary-color), var(--accent-color-tertiary))', color: 'white', fontSize: '3rem', boxShadow: '0 8px 20px rgba(var(--primary-color-rgb), 0.3)', zIndex: '1' }}>
+                <div className="custom-meal-img-container" style={{ height: '220px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg,rgb(231, 223, 216), rgb(180, 170, 160)' }}>
+                  <div className="custom-meal-icon-wrapper" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '120px', height: '120px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, var(--accent-color), var(--accent-color-tertiary))', color: 'white', fontSize: '3rem', boxShadow: '0 8px 20px rgba(var(--primary-color-rgb), 0.3)', zIndex: '1' }}>
                     <FaUtensils style={{ fontSize: '2.5rem' }} />
                   </div>
                   <div className="custom-meal-img-pattern" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: '0.1' }}></div>
@@ -270,17 +270,18 @@ const TopCustomMeals = () => {
                   </div>
                 </div>
                 
-                <p className="card-text">
+                <p className="card-text" style={{marginBottom:'2rem'}}>
                   {meal.description ? (meal.description.length > 100 ? `${meal.description.substring(0, 100)}...` : meal.description) : 'No description provided'}
                 </p>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                  <Link to={`/meals/custom/${meal.id}`} className="btn btn-outline">
+                <div style={{ position:'absolute', bottom:'10px',left:'45px'}}>
+                  <Link to={`/meals/custom/${meal.id}`} className="btn btn-outline" style={{padding:'10px' ,marginRight:'10px'
+                  }}>
                     View Details
                   </Link>
                   <button 
                     onClick={() => handleAddToCart(meal)} 
-                    className="btn btn-primary"
+                    className="btn btn-primary" style={{padding:'10px'}}
                   >
                     Add to Cart
                   </button>
@@ -294,7 +295,7 @@ const TopCustomMeals = () => {
       <div className="section-cta text-center" data-theme="light" style={{ 
         marginTop: '3rem', 
         padding: '2rem', 
-        background: 'linear-gradient(135deg, #FFD700, #FFC107, #FFD700)', 
+        background: 'linear-gradient(135deg, rgb(251 241 185), rgb(139 135 124), rgb(255 176 0))', 
         borderRadius: 'var(--border-radius)',
         boxShadow: '0 10px 25px rgba(255, 215, 0, 0.2)',
       }}>

@@ -95,8 +95,8 @@
 
 .feature-card h3 {
   font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
   color: var(--text-color);
   font-family: var(--heading-font);
   letter-spacing: -0.01em;
@@ -106,7 +106,7 @@
   color: var(--text-color-secondary);
   line-height: 1.7;
   margin-bottom: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   max-width: 280px;
   margin-left: auto;
   margin-right: auto;
@@ -115,7 +115,7 @@
 /* Dark mode text styling */
 [data-theme="dark"] .feature-card h3 {
   color: #f0f0f0;
-  text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.2);
+  text-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.2);
 }
 
 [data-theme="dark"] .feature-card p {
@@ -123,7 +123,7 @@
 }
 
 .feature-card-1 .feature-icon {
-  color: var(--primary-color);
+  color: var(--accent-color);
 }
 
 .feature-card-2 .feature-icon {

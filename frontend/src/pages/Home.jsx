@@ -229,21 +229,11 @@ const Home = () => {
   return (
     <div className="home-container animate-fade-in">
       {/* Hero Section with new styling */}
-      <section className="hero animate-scale-up" style={{ 
-        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        color: 'white',
-        padding: '8rem 1rem',
-        textAlign: 'center',
-        borderRadius: '0',
-        marginBottom: '0',
-        position: 'relative',
-      }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem', borderRadius: '12px', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(5px)' }}>
-          <h1 className="animate-slide-in-bottom" style={{ fontSize: '3.2rem', marginBottom: '1.5rem', fontWeight: '700' }}>Create Your Perfect Meal</h1>
+      <section className="hero animate-scale-up" >
+        <div className='main-hero' >
+          <h1 className=" hero-head animate-slide-in-bottom">Create Your Perfect Meal</h1>
           <p className="animate-slide-in-bottom stagger-delay-1" style={{ fontSize: '1.3rem', maxWidth: '800px', margin: '0 auto 2rem', lineHeight: '1.7' }}>
-            UChef lets you customize your meals exactly how you want them. Choose your ingredients, control your portions, and enjoy your perfect meal.
+            <span style={{color:'var(--accent-color)' , fontWeight:'bold' ,paddingRight:'9px',fontSize:'2rem'}}>U Chef</span> lets you customize your meals exactly how you want them.<br/> Choose your ingredients,<br/> control your portions, <br/>and enjoy your perfect meal.
           </p>
           <div className="hero-buttons animate-slide-in-bottom stagger-delay-2" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <Link to="/restaurants" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }}>
@@ -254,32 +244,26 @@ const Home = () => {
             </Link>
           </div>
         </div>
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color))' }}></div>
+        <img src='images/burger.png' className='light-theme-only'/>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '8px', background: 'linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color))' }}></div>
+
+
       </section>
 
+
       {/* How It Works Section */}
-      <section className="how-it-works animate-fade-in" style={{ 
-        padding: '5rem 2rem', 
-        backgroundColor: 'var(--bg-color-secondary)', 
-        borderRadius: '16px', 
-        margin: '3rem auto', 
-        maxWidth: '1200px',
-        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)'
-      }}>
+      <section className="how-it-works animate-fade-in">
         <div style={{ maxWidth: '800px', margin: '0 auto 4rem', textAlign: 'center' }}>
           <h2 className="section-title animate-slide-in-left" style={{ 
             textAlign: 'center', 
             marginBottom: '1.5rem', 
-            color: 'var(--text-color)', 
+            color: 'var(--accent-color)', 
             fontSize: '2.6rem',
             fontWeight: '700',
             letterSpacing: '-0.02em'
           }}>How It Works</h2>
           <p style={{ 
-            fontSize: '1.1rem', 
-            color: 'var(--text-color-secondary)', 
-            lineHeight: '1.7',
-            maxWidth: '650px',
+            fontSize: '1.6rem', 
             margin: '0 auto'
           }}>
             Our simple three-step process makes creating your perfect meal easier than ever before.
@@ -329,15 +313,15 @@ const Home = () => {
       </section>
 
       {/* Featured Restaurants Section */}
-      <section className="featured-restaurants animate-fade-in" style={{ padding: '4rem 2rem', backgroundColor: 'var(--bg-color)', maxWidth: '1200px', margin: '0 auto' }}>
-        <h2 className="section-title animate-slide-in-right" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--text-color-primary)', fontSize: '2.4rem' }}>Featured Restaurants</h2>
+      <section className="featured-restaurants animate-fade-in" style={{ padding: '4rem 6rem', backgroundColor: 'var(--bg-color)', margin: '0 auto' }}>
+        <h2 className="section-title animate-slide-in-right" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--accent-color)', fontSize: '2.4rem' }}>Featured Restaurants</h2>
         
         {restaurantsLoading ? (
           <div className="loading-container">
             <div className="loading-shimmer" style={{ height: '300px', borderRadius: '10px' }}></div>
           </div>
         ) : (
-          <div className="restaurant-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div className="restaurant-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '5rem' }}>
             {featuredRestaurants.slice(0, 3).map((restaurant, index) => {
               const accentClass = getAccentClass(index);
               return (
@@ -380,15 +364,15 @@ const Home = () => {
       </section>
 
       {/* Featured Meals Section */}
-      <section className="featured-meals animate-fade-in" style={{ padding: '4rem 2rem', backgroundColor: 'var(--bg-color-secondary)', borderRadius: '10px', margin: '2rem auto', maxWidth: '1200px' }}>
-        <h2 className="section-title animate-slide-in-left" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--text-color-primary)', fontSize: '2.4rem' }}>Featured Meals</h2>
+      <section className="featured-meals animate-fade-in" style={{ padding: '4rem 5rem', backgroundColor: 'var(--bg-color-secondary)', borderRadius: '10px', margin: '0rem auto', }}>
+        <h2 className="section-title animate-slide-in-left" style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--accent-color)', fontSize: '2.4rem' }}>Featured Meals</h2>
         
         {mealsLoading ? (
           <div className="loading-container">
             <div className="loading-shimmer" style={{ height: '300px', borderRadius: '10px' }}></div>
           </div>
         ) : (
-          <div className="meal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div className="meal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '3rem' }}>
             {featuredMeals.slice(0, 3).map((meal, index) => {
               const accentClass = getAccentClass(index);
               return (
@@ -437,12 +421,12 @@ const Home = () => {
       <section className="random-meal-section animate-fade-in" style={{ 
         padding: '4rem 2rem', 
         background: 'linear-gradient(135deg, var(--bg-color-secondary), var(--bg-color))', 
-        maxWidth: '1200px', 
-        margin: '2rem auto',
+   
+        margin: '0rem auto',
         borderRadius: '15px',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)'
       }}>
-        <h2 className="section-title animate-slide-in-left" style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--text-color-primary)', fontSize: '2.4rem' }}>Feeling Lucky?</h2>
+        <h2 className="section-title animate-slide-in-left" style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--accent-color)', fontSize: '2.4rem' }}>Feeling Lucky?</h2>
         <p className="section-subtitle" style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 3rem', color: 'var(--text-color-secondary)', fontSize: '1.2rem', lineHeight: '1.6' }}>
           Can't decide what to eat? Let us pick a random meal for you! Click the dice to shuffle through our delicious options.
         </p>
@@ -641,7 +625,7 @@ const Home = () => {
               height: '60px', 
               borderRadius: '50%', 
               border: '3px solid var(--border-color)', 
-              borderTopColor: 'var(--primary-color)',
+              borderTopColor: 'var(--accent-color)',
               animation: 'spin 1s linear infinite'
             }}></div>
           </div>

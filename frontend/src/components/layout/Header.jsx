@@ -74,6 +74,7 @@ const Header = () => {
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         <Link to="/" className="logo">
+        <img src='images/chef-hat.png' className='logo-img'/>
           <span className="logo-text">
             UChef
           </span>

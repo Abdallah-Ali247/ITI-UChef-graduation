@@ -1,15 +1,17 @@
 /* Theme Variables */
 :root {
   /* Light Theme (Default) - Modern Food Service Theme - Enhanced */
-  --primary-color: #E84A37; /* Refined coral red - better accessibility and contrast */
+  --primary-color: #4c2308d3; /* Refined coral red - better accessibility and contrast */
   --secondary-color: #1A8F84; /* Deeper teal - better contrast against light backgrounds */
-  --accent-color: #F7A456; /* Warmer amber - more elegant and less harsh */
+  --accent-color: #bb6515; /* Warmer amber - more elegant and less harsh */
   --accent-color-secondary: #348C5E; /* Deeper green - better readability */
   --accent-color-tertiary: #E86C41; /* Warmer coral orange - better harmony */
+  --accent-color-primary:var(--accent-color-hero)
+  
   
   /* Text colors - Enhanced for readability */
-  --text-color: #2D3748; /* Deep blue-gray - better readability */
-  --text-color-secondary: #4A5568; /* Medium blue-gray - better contrast */
+  --text-color: #2b0f05; /* Deep blue-gray - better readability */
+  --text-color-secondary: #070707; /* Medium blue-gray - better contrast */
   --text-color-tertiary: #718096; /* Light blue-gray - better hierarchy */
   --review-text-color: #3E4C59; /* Slightly darker for better contrast */
   --review-card-bg: #FFFFFF; /* Clean white for review cards */
@@ -19,10 +21,11 @@
   --review-highlight: rgba(232, 74, 55, 0.05); /* Very subtle primary color highlight */
   --header-text: #FFFFFF; /* Clean white for contrast */
   --dice-color: #000000; /* Black dice in light mode */
+  --hero-text-color:black;
   
   /* Background colors - Enhanced for visual harmony */
-  --bg-color: #F0F4F8; /* Softer blue-gray background - easier on the eyes */
-  --bg-color-secondary: #E2E8F0; /* Subtle blue-gray secondary background */
+  --bg-color: #f4f4f4; /* Softer blue-gray background - easier on the eyes */
+  --bg-color-secondary: #f4f4f4; /* Subtle blue-gray secondary background */
   --form-bg: #FFFFFF; /* Pure white for form controls */
   --form-border: rgba(74, 85, 104, 0.12); /* Subtle border for better definition */
   --form-focus-border: var(--primary-color); /* Focus border for form controls */
@@ -55,7 +58,7 @@
   /* Header and footer */
   --header-bg: #FFFFFF; /* White navbar */
   --header-text: #333333; /* Dark text for contrast */
-  --header-text-hover: #E84A37; /* Primary color hover */
+  --header-text-hover: #ca8401; /* Primary color hover */
   --footer-bg: #1A202C; /* Deep blue-black */
   --footer-text: #F3F3F3; /* Off-white */
   
@@ -98,16 +101,31 @@
   --primary-color-rgb: 232, 74, 55;
   --secondary-color-rgb: 26, 143, 132;
   --accent-color-rgb: 247, 164, 86;
+
+
+  /* linear-gradient*/
+  --gradient-color: linear-gradient(
+    rgba(19, 10, 2, 0.877), 
+    rgba(54, 53, 51, 0.7));
+
+  /*background-images*/
+  --background-hero-image: url(images/bg-hero-light.jpg);
+}
+
+[data-theme="dark"] .light-theme-only {
+  display: none;
 }
 
 /* Dark Theme - Enhanced */
 [data-theme="dark"] {
   /* Main colors - more vibrant */
-  --primary-color: #ff7b6b; /* Slightly brighter red */
+  --primary-color: #dd6414; /* Slightly brighter red */
   --secondary-color: #4ecdc4;
-  --accent-color: #ffd166; /* Brighter gold */
+  --accent-color: #c06109; /* Brighter gold */
   --accent-color-secondary: #81b29a;
   --accent-color-tertiary: #f4a261;
+  --accent-color-hero:#F7A456;
+  
   
   /* Text colors - adjusted for better contrast */
   --text-color: #f0f0f0; /* Lighter text for dark mode */
@@ -121,6 +139,8 @@
   --review-highlight: rgba(255, 123, 107, 0.1); /* Subtle primary color highlight */
   --header-text: #ffffff; /* Pure white for header */
   --dice-color: #ffffff; /* White dice in dark mode */
+  
+
   
   /* Background colors - darker */
   --bg-color: #121212; /* Dark base background */
@@ -166,6 +186,12 @@
   
   /* Form focus styles */
   --input-focus-shadow: 0 0 0 3px rgba(255, 123, 107, 0.25);
+
+   /*background-images*/
+   --background-hero-image: url(images/bg-hero-dark.png);
+
+   /* linear-gradient*/
+  --gradient-color: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5))
 }
 
 /* Apply base styles */

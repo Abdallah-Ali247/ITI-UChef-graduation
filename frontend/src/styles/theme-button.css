@@ -81,7 +81,7 @@
 
 /* Cart badge */
 .cart-badge {
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   color: white;
 }
 

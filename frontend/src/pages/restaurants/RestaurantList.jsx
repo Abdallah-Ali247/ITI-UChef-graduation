@@ -20,12 +20,12 @@ const RestaurantList = () => {
   
   return (
     <div className="restaurant-list-page">
-      <div className="page-header" style={{ marginBottom: '2rem' }}>
-        <h1>Restaurants</h1>
+      <div className="page-header" style={{ marginBottom: '2rem',textAlign:'center' }}>
+        <h1 style={{color:'var(--accent-color)',fontWeight:'bold',fontSize:'3rem',paddinTop:'30px'}}>Restaurants</h1>
         <p>Choose from our selection of restaurants and customize your perfect meal.</p>
       </div>
       
-      <div className="search-bar" style={{ marginBottom: '4rem' }}>
+      <div className="search-bar" style={{ marginBottom: '4rem',marginLeft:'450px'}}>
         <input 
           type="text" 
           placeholder="Search restaurants..." 

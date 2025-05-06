@@ -68,7 +68,7 @@ img {
   transform: translateX(-50%);
   width: 20px;
   height: 3px;
-  background-color: var(--primary-color);
+  background-color: var(--accent-color);
   border-radius: 3px;
 }
 
