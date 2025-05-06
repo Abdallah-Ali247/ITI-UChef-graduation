@@ -88,4 +88,27 @@ UChef is a web-based platform that allows users to order predefined meals or cus
    STRIPE_SECRET_KEY=your-stripe-secret-key
    DATABASE_URL=postgres://user:password@localhost:5432/uchef
     ```
-5. 
+5. Run migrations:
+   ```
+   python manage.py migrate
+   ```
+6. Start the backend server:
+   ```
+   python manage.py runserver
+   ```
+### **Frontend Setup**
+1. Navigate to the frontend directory:
+   ```
+   cd ../frontend
+   ```
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the frontend development server:
+   ```
+   npm start
+   ```
+
+## i'm Happy that you Here :) 
+
