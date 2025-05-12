@@ -68,7 +68,7 @@ UChef is a web-based platform that allows users to order predefined meals or cus
 #### **Backend Setup**
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Abdallah-Ali247/uchef.git
+   git clone https://github.com/Abdallah-Ali247/ITI-UChef-graduation.git
    cd uchef/backend
    ```
 2. Create a virtual environment:
